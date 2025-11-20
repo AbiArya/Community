@@ -35,17 +35,16 @@ describe("MatchingPreferences", () => {
     hobbies: [],
   };
 
-  const mockSupabaseClient = {
-    from: jest.fn(() => ({
-      update: jest.fn(() => ({
-        eq: jest.fn().mockResolvedValue({ error: null }),
-      })),
-    })),
-  };
+  let mockFrom: jest.Mock;
+  let mockUpdate: jest.Mock;
+  let mockEq: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetSupabaseClient.mockReturnValue(mockSupabaseClient as any);
+    mockEq = jest.fn().mockResolvedValue({ error: null });
+    mockUpdate = jest.fn(() => ({ eq: mockEq }));
+    mockFrom = jest.fn(() => ({ update: mockUpdate }));
+    mockGetSupabaseClient.mockReturnValue({ from: mockFrom } as any);
   });
 
   test("renders loading state", () => {
@@ -71,7 +70,7 @@ describe("MatchingPreferences", () => {
     render(<MatchingPreferences />);
     
     expect(screen.getByText(/Matches will be within ages 25 to 35/)).toBeInTheDocument();
-    expect(screen.getByText(/Find friends within 50 miles/)).toBeInTheDocument();
+    expect(screen.getByText(/Find friends within 50 kilometers/)).toBeInTheDocument();
   });
 
 
@@ -107,12 +106,27 @@ describe("MatchingPreferences", () => {
     const distanceSlider = screen.getByRole("slider");
     fireEvent.change(distanceSlider, { target: { value: "75" } });
     
-    expect(screen.getByText(/Find friends within 75 miles of your location/)).toBeInTheDocument();
+    expect(screen.getByText(/Find friends within 75 kilometers of your location/)).toBeInTheDocument();
+  });
+
+  test("updates match frequency selection", () => {
+    mockUseProfileData.mockReturnValue({
+      data: mockProfile,
+      isLoading: false,
+      error: null,
+      refresh: jest.fn(),
+    });
+
+    render(<MatchingPreferences />);
+
+    fireEvent.click(screen.getByRole("button", { name: "4" }));
+
+    expect(screen.getByText("We'll send you 4 matches each week.")).toBeInTheDocument();
   });
 
   test("saves preferences successfully", async () => {
     const mockRefresh = jest.fn();
-    
+
     mockUseProfileData.mockReturnValue({
       data: mockProfile,
       isLoading: false,
@@ -121,19 +135,23 @@ describe("MatchingPreferences", () => {
     });
 
     render(<MatchingPreferences />);
-    
-    // Make a change to age range
-    const minAgeInput = screen.getByDisplayValue("25");
-    fireEvent.change(minAgeInput, { target: { value: "22" } });
-    
-    // Save
-    const saveButton = screen.getByText("Save Preferences");
-    fireEvent.click(saveButton);
-    
+
+    fireEvent.change(screen.getByDisplayValue("25"), { target: { value: "22" } });
+    fireEvent.click(screen.getByRole("button", { name: "4" }));
+
+    fireEvent.click(screen.getByText("Save Preferences"));
+
     await waitFor(() => {
       expect(screen.getByText("Preferences updated successfully!")).toBeInTheDocument();
     });
 
+    expect(mockUpdate).toHaveBeenCalledWith({
+      age_range_min: 22,
+      age_range_max: 35,
+      distance_radius: 50,
+      match_frequency: 4,
+    });
+    expect(mockEq).toHaveBeenCalledWith("id", "user-1");
     expect(mockRefresh).toHaveBeenCalled();
   });
 
@@ -194,12 +212,8 @@ describe("MatchingPreferences", () => {
     });
 
     // Mock database error
-    mockSupabaseClient.from.mockReturnValue({
-      update: jest.fn(() => ({
-        eq: jest.fn().mockResolvedValue({ 
-          error: { message: "Database error" } 
-        }),
-      })),
+    mockEq.mockResolvedValueOnce({
+      error: { message: "Database error" },
     });
 
     render(<MatchingPreferences />);
@@ -228,8 +242,10 @@ describe("MatchingPreferences", () => {
     // Make changes to age range
     const minAgeInput = screen.getByDisplayValue("25");
     fireEvent.change(minAgeInput, { target: { value: "30" } });
+    fireEvent.click(screen.getByRole("button", { name: "5" }));
     
     expect(screen.getByText(/Matches will be within ages 30 to 35/)).toBeInTheDocument();
+    expect(screen.getByText("We'll send you 5 matches each week.")).toBeInTheDocument();
     
     // Cancel
     const cancelButton = screen.getByText("Cancel");
@@ -237,5 +253,6 @@ describe("MatchingPreferences", () => {
     
     // Should reset to original value
     expect(screen.getByText(/Matches will be within ages 25 to 35/)).toBeInTheDocument();
+    expect(screen.getByText("We'll send you 2 matches each week.")).toBeInTheDocument();
   });
 });

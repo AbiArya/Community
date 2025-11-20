@@ -4,6 +4,12 @@ import { useState, useEffect } from "react";
 import { useProfileData } from "@/hooks/useProfileData";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
+const MATCH_FREQUENCY_OPTIONS = [1, 2, 3, 4, 5] as const;
+type MatchFrequencyOption = (typeof MATCH_FREQUENCY_OPTIONS)[number];
+
+const resolveFrequency = (value: number): MatchFrequencyOption =>
+  MATCH_FREQUENCY_OPTIONS.includes(value as MatchFrequencyOption) ? (value as MatchFrequencyOption) : 2;
+
 export function MatchingPreferences() {
   const { data: profileData, refresh } = useProfileData();
   const [isEditing, setIsEditing] = useState(false);
@@ -13,6 +19,7 @@ export function MatchingPreferences() {
   const [ageRangeMin, setAgeRangeMin] = useState(18);
   const [ageRangeMax, setAgeRangeMax] = useState(100);
   const [distanceRadius, setDistanceRadius] = useState(50);
+  const [matchFrequency, setMatchFrequency] = useState<MatchFrequencyOption>(2);
 
   // Initialize form values when profile data loads
   useEffect(() => {
@@ -20,6 +27,7 @@ export function MatchingPreferences() {
       setAgeRangeMin(profileData.age_range_min);
       setAgeRangeMax(profileData.age_range_max);
       setDistanceRadius(profileData.distance_radius);
+      setMatchFrequency(resolveFrequency(profileData.match_frequency));
     }
   }, [profileData]);
 
@@ -59,6 +67,7 @@ export function MatchingPreferences() {
           age_range_min: ageRangeMin,
           age_range_max: ageRangeMax,
           distance_radius: distanceRadius,
+          match_frequency: matchFrequency,
         })
         .eq("id", profileData.id);
 
@@ -87,6 +96,7 @@ export function MatchingPreferences() {
     setAgeRangeMin(profileData.age_range_min);
     setAgeRangeMax(profileData.age_range_max);
     setDistanceRadius(profileData.distance_radius);
+    setMatchFrequency(resolveFrequency(profileData.match_frequency));
     setIsEditing(false);
     setMessage(null);
   };
@@ -138,7 +148,7 @@ export function MatchingPreferences() {
       {/* Distance Radius */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Distance Radius (miles)
+          Distance Radius (kilometers)
         </label>
         <div className="space-y-2">
           <input
@@ -155,13 +165,43 @@ export function MatchingPreferences() {
             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
           />
           <div className="flex justify-between text-xs text-gray-500">
-            <span>5 mi</span>
-            <span className="font-semibold text-blue-600">{distanceRadius} miles</span>
-            <span>100 mi</span>
+            <span>5 km</span>
+            <span className="font-semibold text-blue-600">{distanceRadius} km</span>
+            <span>100 km</span>
           </div>
         </div>
         <p className="mt-1 text-xs text-gray-500">
-          Find friends within {distanceRadius} miles of your location
+          Find friends within {distanceRadius} kilometers of your location
+        </p>
+      </div>
+
+      {/* Match Frequency */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Matches per Week
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {MATCH_FREQUENCY_OPTIONS.map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => {
+                setMatchFrequency(option);
+                if (!isEditing) setIsEditing(true);
+              }}
+              disabled={isLoading}
+              className={`px-3 py-1.5 text-sm rounded-md border ${
+                matchFrequency === option
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "border-gray-300 text-gray-700 hover:bg-gray-50"
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+        <p className="mt-1 text-xs text-gray-500">
+          We'll send you {matchFrequency} match{matchFrequency === 1 ? "" : "es"} each week.
         </p>
       </div>
 

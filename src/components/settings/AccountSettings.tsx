@@ -1,35 +1,99 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useProfileData } from "@/hooks/useProfileData";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export function AccountSettings() {
   const { data: profileData, refresh } = useProfileData();
-  const [isEditing, setIsEditing] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [phoneInput, setPhoneInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  useEffect(() => {
+    if (!profileData) {
+      setPhoneInput("");
+      return;
+    }
+
+    if (!isEditingPhone) {
+      setPhoneInput(profileData.phone_number ?? "");
+    }
+  }, [profileData, isEditingPhone]);
 
   if (!profileData) {
     return <div className="text-sm text-gray-500">Loading account information...</div>;
   }
 
+  const stripFormatting = (value: string) =>
+    value.trim() === "" ? "" : value.replace(/[\s().-]/g, "");
+
+  const normalizedInput = stripFormatting(phoneInput);
+  const hasPhoneChanged = normalizedInput !== (profileData.phone_number ?? "");
+  const isRemovingPhone = Boolean(profileData.phone_number) && normalizedInput === "";
+
+  const formattedPhoneNumber = useMemo(() => {
+    return profileData.phone_number ? profileData.phone_number : "Not set";
+  }, [profileData.phone_number]);
+
+  const startEditing = () => {
+    setIsEditingPhone(true);
+    setPhoneInput(profileData.phone_number ?? "");
+    setMessage(null);
+  };
+
+  const cancelEditing = () => {
+    setIsEditingPhone(false);
+    setPhoneInput(profileData.phone_number ?? "");
+    setMessage(null);
+  };
+
   const handlePhoneNumberUpdate = async () => {
+    if (!hasPhoneChanged) {
+      setMessage({
+        type: "error",
+        text: "Enter a new phone number or clear it to remove.",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setMessage(null);
 
     try {
+      const normalized = normalizedInput;
+
+      if (normalized && !normalized.startsWith("+")) {
+        throw new Error("Include your country code. Example: +15551234567");
+      }
+
+      if (normalized && !/^\+[1-9]\d{7,14}$/.test(normalized)) {
+        throw new Error("Enter a valid phone number (8-15 digits after the + sign).");
+      }
+
       const supabase = getSupabaseBrowserClient();
-      
-      // Phone number update would require adding phone field to database
-      // For now, we'll show this as a placeholder
+
+      const { error } = await supabase
+        .from("users")
+        .update({
+          phone_number: normalized || null,
+        })
+        .eq("id", profileData.id);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      await refresh();
+
       setMessage({
-        type: "error",
-        text: "Phone number functionality is coming soon. The database schema needs to be updated first.",
+        type: "success",
+        text: normalized
+          ? "Phone number updated successfully."
+          : "Phone number removed from your account.",
       });
-      
-      setIsEditing(false);
+      setIsEditingPhone(false);
     } catch (error) {
       setMessage({
         type: "error",
@@ -61,43 +125,39 @@ export function AccountSettings() {
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Phone Number <span className="text-xs text-gray-500">(Optional)</span>
         </label>
-        {!isEditing ? (
+        {!isEditingPhone ? (
           <div className="flex items-center gap-3">
             <div className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600">
-              Not set
+              {formattedPhoneNumber}
             </div>
             <button
-              onClick={() => setIsEditing(true)}
+              onClick={startEditing}
               className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 border border-blue-600 rounded-md hover:bg-blue-50"
             >
-              Add Phone
+              {profileData.phone_number ? "Update Phone" : "Add Phone"}
             </button>
           </div>
         ) : (
           <div className="space-y-2">
             <input
               type="tel"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="+1 (555) 123-4567"
+              value={phoneInput}
+              onChange={(e) => setPhoneInput(e.target.value)}
+              placeholder="+15551234567"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <div className="flex gap-2">
               <button
                 onClick={handlePhoneNumberUpdate}
-                disabled={isLoading || !phoneNumber}
+                disabled={isLoading || !hasPhoneChanged}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? "Saving..." : "Save"}
+                {isLoading ? "Saving..." : isRemovingPhone ? "Remove Phone" : "Save"}
               </button>
               <button
-                onClick={() => {
-                  setIsEditing(false);
-                  setPhoneNumber("");
-                  setMessage(null);
-                }}
+                onClick={cancelEditing}
                 disabled={isLoading}
-                className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
@@ -105,7 +165,7 @@ export function AccountSettings() {
           </div>
         )}
         <p className="mt-1 text-xs text-gray-500">
-          SMS verification will be required to add or change your phone number
+          Use international format with your country code. Example: +15551234567
         </p>
       </div>
 
@@ -152,4 +212,3 @@ export function AccountSettings() {
     </div>
   );
 }
-

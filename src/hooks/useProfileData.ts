@@ -30,6 +30,7 @@ export interface ProfileData {
   bio: string | null;
   location: string | null;
   age: number | null;
+  phone_number: string | null;
   is_profile_complete: boolean;
   match_frequency: number;
   age_range_min: number;
