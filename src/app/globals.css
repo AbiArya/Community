@@ -1,26 +1,135 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --background: #fdf7f0;
+  --foreground: #070b1a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --color-brand-50: #f3e6ff;
+  --color-brand-100: #e5cbff;
+  --color-brand-200: #d1a2ff;
+  --color-brand-300: #bd7bff;
+  --color-brand-400: #a24dff;
+  --color-brand-500: #8b30ff;
+  --color-brand-600: #7a21ef;
+  --color-brand-700: #6418c6;
+  --color-brand-800: #4f1199;
+  --color-brand-900: #360c66;
+
+  --color-peach-50: #fff0e6;
+  --color-peach-100: #ffd7bf;
+  --color-peach-200: #ffb38a;
+  --color-peach-300: #ff8f55;
+  --color-peach-400: #ff712b;
+  --color-peach-500: #f85a0a;
+
+  --color-sand-50: #fff7eb;
+  --color-sand-100: #fde8cf;
+  --color-sand-200: #f4d2aa;
+  --color-sand-300: #dcb37f;
+  --color-sand-400: #b88a57;
+
+  --color-ink-50: #f6f7fb;
+  --color-ink-100: #e6e8f2;
+  --color-ink-200: #ccd0e2;
+  --color-ink-300: #a3a8c0;
+  --color-ink-400: #7c829e;
+  --color-ink-500: #616684;
+  --color-ink-600: #4a4f6a;
+  --color-ink-700: #2f3246;
+  --color-ink-800: #1f2232;
+  --color-ink-900: #111423;
+
+  --font-sans: var(--font-geist-sans), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-heading: var(--font-geist-sans), "Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+
+  --spacing-13: 3.25rem;
+  --spacing-15: 3.75rem;
+  --spacing-18: 4.5rem;
+
+  --radius-lg: 1.1rem;
+  --radius-xl: 1.55rem;
+  --radius-2xl: 2.25rem;
+  --radius-3xl: 3rem;
+  --radius-pill: 999px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    color-scheme: light;
   }
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body {
-  background: var(--background);
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 20% -10%, rgba(122, 33, 239, 0.32), transparent 55%),
+    radial-gradient(circle at 80% 0%, rgba(255, 140, 43, 0.28), transparent 45%),
+    var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  background: rgba(140, 92, 246, 0.2);
+  color: var(--color-ink-900);
+}
+
+:focus-visible {
+  outline: 2px solid rgba(124, 58, 237, 0.7);
+  outline-offset: 3px;
+  border-radius: 0.25rem;
+}
+
+@layer utilities {
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: var(--radius-2xl);
+    box-shadow: 0 40px 120px -60px rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(28px);
+  }
+
+  .eyebrow-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: var(--radius-pill);
+    padding: 0.2rem 1rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
 }

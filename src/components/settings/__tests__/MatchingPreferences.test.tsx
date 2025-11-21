@@ -71,6 +71,7 @@ describe("MatchingPreferences", () => {
     
     expect(screen.getByText(/Matches will be within ages 25 to 35/)).toBeInTheDocument();
     expect(screen.getByText(/Find friends within 50 kilometers/)).toBeInTheDocument();
+    expect(screen.getByText(/2 matches/)).toBeInTheDocument();
   });
 
 
@@ -109,21 +110,6 @@ describe("MatchingPreferences", () => {
     expect(screen.getByText(/Find friends within 75 kilometers of your location/)).toBeInTheDocument();
   });
 
-  test("updates match frequency selection", () => {
-    mockUseProfileData.mockReturnValue({
-      data: mockProfile,
-      isLoading: false,
-      error: null,
-      refresh: jest.fn(),
-    });
-
-    render(<MatchingPreferences />);
-
-    fireEvent.click(screen.getByRole("button", { name: "4" }));
-
-    expect(screen.getByText("We'll send you 4 matches each week.")).toBeInTheDocument();
-  });
-
   test("saves preferences successfully", async () => {
     const mockRefresh = jest.fn();
 
@@ -137,7 +123,6 @@ describe("MatchingPreferences", () => {
     render(<MatchingPreferences />);
 
     fireEvent.change(screen.getByDisplayValue("25"), { target: { value: "22" } });
-    fireEvent.click(screen.getByRole("button", { name: "4" }));
 
     fireEvent.click(screen.getByText("Save Preferences"));
 
@@ -149,7 +134,6 @@ describe("MatchingPreferences", () => {
       age_range_min: 22,
       age_range_max: 35,
       distance_radius: 50,
-      match_frequency: 4,
     });
     expect(mockEq).toHaveBeenCalledWith("id", "user-1");
     expect(mockRefresh).toHaveBeenCalled();
@@ -242,10 +226,8 @@ describe("MatchingPreferences", () => {
     // Make changes to age range
     const minAgeInput = screen.getByDisplayValue("25");
     fireEvent.change(minAgeInput, { target: { value: "30" } });
-    fireEvent.click(screen.getByRole("button", { name: "5" }));
     
     expect(screen.getByText(/Matches will be within ages 30 to 35/)).toBeInTheDocument();
-    expect(screen.getByText("We'll send you 5 matches each week.")).toBeInTheDocument();
     
     // Cancel
     const cancelButton = screen.getByText("Cancel");
@@ -253,6 +235,5 @@ describe("MatchingPreferences", () => {
     
     // Should reset to original value
     expect(screen.getByText(/Matches will be within ages 25 to 35/)).toBeInTheDocument();
-    expect(screen.getByText("We'll send you 2 matches each week.")).toBeInTheDocument();
   });
 });

@@ -11,9 +11,12 @@ export type Database = {
           updated_at: string;
           full_name: string;
           bio: string | null;
-          location: string | null;
+          location: string | null; // Deprecated: use zipcode instead
+          zipcode: string | null;
+          latitude: number | null;
+          longitude: number | null;
           age: number | null;
-      phone_number: string | null;
+          phone_number: string | null;
           is_profile_complete: boolean;
           last_active: string;
           match_frequency: number;
@@ -27,9 +30,12 @@ export type Database = {
           email: string;
           full_name: string;
           bio?: string | null;
-          location?: string | null;
+          location?: string | null; // Deprecated: use zipcode instead
+          zipcode?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
           age?: number | null;
-      phone_number?: string | null;
+          phone_number?: string | null;
           is_profile_complete?: boolean;
           match_frequency?: number;
           age_range_min?: number;
@@ -39,9 +45,12 @@ export type Database = {
         };
         Update: {
           bio?: string | null;
-          location?: string | null;
+          location?: string | null; // Deprecated: use zipcode instead
+          zipcode?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
           age?: number | null;
-      phone_number?: string | null;
+          phone_number?: string | null;
           is_profile_complete?: boolean;
           match_frequency?: number;
           age_range_min?: number;

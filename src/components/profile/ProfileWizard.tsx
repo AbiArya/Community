@@ -8,6 +8,7 @@ import { PreferencesStep } from "@/components/profile/PreferencesStep";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useAuthSession } from "@/hooks/useAuthSession";
 import { useRouter } from "next/navigation";
+import { validateAndNormalizeZipcode } from "@/lib/utils/zipcode";
 
 type WizardStep = 0 | 1 | 2 | 3;
 
@@ -15,8 +16,10 @@ export function ProfileWizard() {
   const [currentStep, setCurrentStep] = useState<WizardStep>(0);
   const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
   const [hobbies, setHobbies] = useState<RankedHobby[]>([]);
+  const [name, setName] = useState<string>("");
+  const [age, setAge] = useState<string>("");
   const [bio, setBio] = useState<string>("");
-  const [prefs, setPrefs] = useState({ ageMin: 21, ageMax: 45, distanceKm: 25 });
+  const [prefs, setPrefs] = useState({ zipcode: "", ageMin: 21, ageMax: 45, distanceKm: 25 });
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const { session } = useAuthSession();
@@ -38,6 +41,9 @@ export function ProfileWizard() {
       if (!session) {
         throw new Error("Not authenticated");
       }
+      
+      // Validate and convert zipcode to coordinates
+      const { zipcode, latitude, longitude } = validateAndNormalizeZipcode(prefs.zipcode);
       
       // Upload photos to Supabase Storage first
       const uploadedPhotos = [];
@@ -82,8 +88,12 @@ export function ProfileWizard() {
           .insert({
             id: session.user.id,
             email: session.user.email!,
-            full_name: session.user.user_metadata?.full_name || session.user.email!.split('@')[0],
+            full_name: name.trim(),
+            age: age && age !== '' ? parseInt(age) : null,
             bio,
+            zipcode,
+            latitude,
+            longitude,
             is_profile_complete: true,
             match_frequency: 2,
             age_range_min: prefs.ageMin,
@@ -101,7 +111,12 @@ export function ProfileWizard() {
         const { data: updateData, error: updateError } = await supabase
           .from("users")
           .update({
+            full_name: name.trim(),
+            age: age && age !== '' ? parseInt(age) : null,
             bio,
+            zipcode,
+            latitude,
+            longitude,
             is_profile_complete: true,
             match_frequency: 2,
             age_range_min: prefs.ageMin,
@@ -190,7 +205,7 @@ export function ProfileWizard() {
           </div>
         )}
         {currentStep === 2 && (
-          <DescriptionStep value={bio} onChange={setBio} />
+          <DescriptionStep value={bio} onChange={setBio} name={name} onNameChange={setName} age={age} onAgeChange={setAge} />
         )}
         {currentStep === 3 && (
           <PreferencesStep value={prefs} onChange={setPrefs} />
@@ -216,13 +231,15 @@ export function ProfileWizard() {
             disabled={
               (currentStep === 0 && photos.length < 2) ||
               (currentStep === 1 && hobbies.length < 1) ||
-              (currentStep === 2 && bio.trim().length < 20)
+              (currentStep === 2 && (name.trim().length < 2 || bio.trim().length < 20))
             }
           >
             {currentStep === 0 && photos.length < 2
               ? "Add at least 2 photos"
               : currentStep === 1 && hobbies.length < 1
               ? "Select at least 1 hobby"
+              : currentStep === 2 && name.trim().length < 2
+              ? "Enter your name"
               : currentStep === 2 && bio.trim().length < 20
               ? "Write at least 20 characters"
               : "Next"}
@@ -231,9 +248,9 @@ export function ProfileWizard() {
           <button
             className="px-3 py-2 text-sm rounded bg-black text-white disabled:opacity-50"
             onClick={completeProfile}
-            disabled={isSaving}
+            disabled={isSaving || !prefs.zipcode.trim()}
           >
-            {isSaving ? "Saving..." : "Complete Profile"}
+            {isSaving ? "Saving..." : !prefs.zipcode.trim() ? "Enter zipcode" : "Complete Profile"}
           </button>
         )}
       </div>

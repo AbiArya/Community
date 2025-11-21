@@ -28,7 +28,10 @@ export interface ProfileData {
   email: string;
   full_name: string;
   bio: string | null;
-  location: string | null;
+  location: string | null; // Deprecated: use zipcode instead
+  zipcode: string | null;
+  latitude: number | null;
+  longitude: number | null;
   age: number | null;
   phone_number: string | null;
   is_profile_complete: boolean;

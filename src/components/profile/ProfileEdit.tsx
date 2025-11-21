@@ -6,6 +6,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useAuthSession } from "@/hooks/useAuthSession";
 import { PhotoManagement } from "./PhotoManagement";
 import { HobbyManagement } from "./HobbyManagement";
+import { validateAndNormalizeZipcode, zipcodeToLocation, isValidZipcode } from "@/lib/utils/zipcode";
 
 interface ProfileEditProps {
   onSaveSuccess?: () => void;
@@ -22,12 +23,16 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
   const [formData, setFormData] = useState({
     full_name: "",
     bio: "",
-    location: "",
+    zipcode: "",
     age: "" as string | number,
     age_range_min: 18,
     age_range_max: 100,
     distance_radius: 50,
   });
+  
+  // Zipcode validation state
+  const [zipcodeError, setZipcodeError] = useState<string>("");
+  const [locationDisplay, setLocationDisplay] = useState<string>("");
 
   // Local hobby state for editing
   const [localHobbies, setLocalHobbies] = useState<UserHobby[]>([]);
@@ -38,7 +43,7 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
       setFormData({
         full_name: profile.full_name || "",
         bio: profile.bio || "",
-        location: profile.location || "",
+        zipcode: profile.zipcode || "",
         age: profile.age?.toString() || "",
         age_range_min: profile.age_range_min || 18,
         age_range_max: profile.age_range_max || 100,
@@ -46,6 +51,14 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
       });
       // Initialize local hobbies
       setLocalHobbies(profile.hobbies || []);
+      
+      // Show location for existing zipcode
+      if (profile.zipcode) {
+        const location = zipcodeToLocation(profile.zipcode);
+        if (location) {
+          setLocationDisplay(location);
+        }
+      }
     }
   }, [profile]);
 
@@ -54,6 +67,36 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
       ...prev,
       [field]: value
     }));
+    
+    // Clear zipcode error when user types
+    if (field === "zipcode") {
+      setZipcodeError("");
+      setLocationDisplay("");
+    }
+  };
+  
+  const validateZipcode = () => {
+    const zip = formData.zipcode.trim();
+    if (!zip) {
+      setZipcodeError("Zipcode is required");
+      setLocationDisplay("");
+      return false;
+    }
+    
+    if (!isValidZipcode(zip)) {
+      setZipcodeError("Please enter a valid US zipcode");
+      setLocationDisplay("");
+      return false;
+    }
+    
+    // Show location for valid zipcode
+    const location = zipcodeToLocation(zip);
+    if (location) {
+      setLocationDisplay(location);
+    }
+    
+    setZipcodeError("");
+    return true;
   };
 
   const handleNumberInputChange = (field: string, value: string) => {
@@ -70,26 +113,40 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
   const handleSave = async () => {
     if (!session || !profile) return;
 
+    // Validate zipcode before saving
+    if (!validateZipcode()) {
+      setSaveError("Please enter a valid zipcode");
+      return;
+    }
+
     setSaveError(null);
     setSaveSuccess(false);
     setIsSaving(true);
 
     try {
       const supabase = getSupabaseBrowserClient();
+      
+      // Validate and convert zipcode to coordinates
+      const { zipcode, latitude, longitude } = validateAndNormalizeZipcode(formData.zipcode);
 
       // Prepare update data
       const updateData: {
         full_name: string;
         bio: string | null;
-        location: string | null;
+        zipcode: string;
+        latitude: number;
+        longitude: number;
         age: number | null;
         age_range_min: number;
         age_range_max: number;
         distance_radius: number;
+        updated_at: string;
       } = {
         full_name: formData.full_name,
         bio: formData.bio,
-        location: formData.location || null,
+        zipcode,
+        latitude,
+        longitude,
         age: formData.age && formData.age !== '' ? (typeof formData.age === 'number' ? formData.age : parseInt(formData.age)) : null,
         age_range_min: formData.age_range_min,
         age_range_max: formData.age_range_max,
@@ -286,17 +343,31 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
           </div>
         </div>
         <div>
-          <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-            Location
+          <label htmlFor="zipcode" className="block text-sm font-medium text-gray-700 mb-1">
+            Zipcode <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
-            id="location"
-            value={formData.location}
-            onChange={(e) => handleInputChange("location", e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-            placeholder="Enter your city or region"
+            id="zipcode"
+            value={formData.zipcode}
+            onChange={(e) => handleInputChange("zipcode", e.target.value)}
+            onBlur={validateZipcode}
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent ${
+              zipcodeError ? 'border-red-500' : 'border-gray-300'
+            }`}
+            placeholder="e.g., 94102"
+            maxLength={10}
+            autoComplete="postal-code"
           />
+          {zipcodeError && (
+            <p className="text-xs text-red-600 mt-1">{zipcodeError}</p>
+          )}
+          {locationDisplay && !zipcodeError && (
+            <p className="text-xs text-green-600 mt-1">✓ {locationDisplay}</p>
+          )}
+          <p className="text-xs text-gray-500 mt-1">
+            We use your zipcode for distance-based matching
+          </p>
         </div>
       </div>
 

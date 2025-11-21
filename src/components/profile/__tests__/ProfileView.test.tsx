@@ -196,7 +196,6 @@ describe("ProfileView", () => {
     render(<ProfileView />);
     
     expect(screen.getByText("25 - 35")).toBeInTheDocument();
-    expect(screen.getByText("50 km")).toBeInTheDocument();
-    expect(screen.getByText("2 per week")).toBeInTheDocument();
+    expect(screen.getByText("31 miles")).toBeInTheDocument();
   });
 });

@@ -1,80 +1,189 @@
 import Link from "next/link";
 
+const features = [
+  {
+    title: "Hobby-first matching",
+    description: "Rank the interests that matter most and we prioritize people who share them.",
+    meta: "Signal fit quickly",
+  },
+  {
+    title: "Local-first intros",
+    description: "PostGIS-backed distance filters keep recommendations within your preferred radius.",
+    meta: "Stay close to home",
+  },
+  {
+    title: "Quality over quantity",
+    description: "Two curated intros each Monday keeps the experience calm, intentional, and exciting.",
+    meta: "Reduce swipe fatigue",
+  },
+];
+
+const rituals = [
+  { title: "Weekly drops", detail: "New matches arrive every Monday morning." },
+  { title: "Context-rich cards", detail: "Photos, top hobbies, and short bios at a glance." },
+  { title: "Thoughtful follow-up", detail: "Track when each person views or accepts an intro." },
+];
+
+const faq = [
+  {
+    question: "How do matches work?",
+    answer: "We score similarity using your ranked hobbies plus proximity. You get two intros per week—no infinite queues.",
+  },
+  {
+    question: "Is the product free?",
+    answer: "Yes for the MVP. We may add premium perks (more matches, deeper insights) after validating delight.",
+  },
+  {
+    question: "What do I need to sign up?",
+    answer: "Just your email. Supabase Auth sends a secure magic link—no passwords, no friction.",
+  },
+  {
+    question: "Can I edit my profile later?",
+    answer: "You can rearrange hobbies, tweak preferences, and refresh photos at any time from settings.",
+  },
+];
+
 export default function Home() {
   return (
-    <main>
-      <section className="w-full pt-16 pb-20 px-6 bg-white">
-        <div className="mx-auto max-w-5xl grid md:grid-cols-2 items-center gap-8">
-          <div className="space-y-5">
-            <h1 className="text-4xl sm:text-6xl font-semibold tracking-tight">Make friends through shared hobbies</h1>
-            <p className="text-lg text-black/70 dark:text-white/70">Get 2 curated matches every week based on the interests you care about most.</p>
-            <div className="flex gap-3">
-              <Link href="/signup" className="bg-black text-white rounded px-4 py-2 text-sm">Get started</Link>
-              <Link href="#features" className="underline text-sm">Learn more</Link>
+    <main className="mx-auto flex max-w-6xl flex-col gap-20 px-4 pb-24 pt-16">
+      <section className="glass-panel grid gap-12 p-10 md:grid-cols-2">
+        <div className="space-y-6">
+          <span className="eyebrow-pill border border-brand-200 bg-brand-50/70 text-brand-700">Weekly friend drops</span>
+          <h1 className="font-heading text-4xl leading-tight text-ink-900 sm:text-5xl">
+            Make real friends through hobbies, not endless swiping.
+          </h1>
+          <p className="text-lg text-ink-600">
+            Community Friends introduces you to two thoughtful matches every week—people nearby who actually share your
+            favorite ways to spend time.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/signup"
+              className="inline-flex items-center justify-center rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-[0_25px_60px_-25px_rgba(124,58,237,0.75)] transition hover:-translate-y-0.5 hover:bg-brand-500"
+            >
+              Start free profile
+            </Link>
+            <Link
+              href="#features"
+              className="inline-flex items-center justify-center rounded-full border border-ink-200 bg-white/70 px-6 py-3 text-sm font-semibold text-ink-700 transition hover:-translate-y-0.5 hover:text-brand-600"
+            >
+              Explore the product
+            </Link>
+          </div>
+          <div className="grid gap-4 text-sm sm:grid-cols-3">
+            <div className="rounded-2xl border border-white/60 bg-white/70 p-4 shadow-[0_15px_35px_rgba(17,20,35,0.08)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Matches Weekly</p>
+              <p className="text-2xl font-semibold text-ink-900">2 curated</p>
+            </div>
+            <div className="rounded-2xl border border-white/60 bg-white/70 p-4 shadow-[0_15px_35px_rgba(17,20,35,0.08)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Setup Time</p>
+              <p className="text-2xl font-semibold text-ink-900">&lt;10 min</p>
+            </div>
+            <div className="rounded-2xl border border-white/60 bg-white/70 p-4 shadow-[0_15px_35px_rgba(17,20,35,0.08)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Local Radius</p>
+              <p className="text-2xl font-semibold text-ink-900">Up to 50 mi</p>
             </div>
           </div>
-          <div className="hidden md:block">
-            <div className="rounded-xl border p-6">
-              <p className="font-medium mb-2">Why it works</p>
-              <ul className="list-disc pl-5 text-black/70 dark:text-white/70 space-y-1 text-sm">
-                <li>Interest-first matching</li>
-                <li>Local community focus</li>
-                <li>Quality over quantity</li>
-              </ul>
+        </div>
+        <div className="rounded-[32px] border border-white/60 bg-gradient-to-br from-brand-50 via-white to-peach-50 p-8 shadow-[0_30px_80px_-45px_rgba(17,20,35,0.4)]">
+          <h2 className="mb-6 font-heading text-xl text-ink-900">Your weekly flow</h2>
+          <div className="space-y-5 text-sm text-ink-600">
+            <div className="rounded-2xl border border-brand-100 bg-white/80 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Monday</p>
+              <p className="mt-2 text-base text-ink-900">Matches drop with bios, hobbies, and recommended prompts.</p>
+            </div>
+            <div className="rounded-2xl border border-sand-200 bg-white/80 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-600">Midweek</p>
+              <p className="mt-2 text-base text-ink-900">Review profiles, mark interest, and unlock contact details.</p>
+            </div>
+            <div className="rounded-2xl border border-peach-200 bg-white/80 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-peach-500">Weekend</p>
+              <p className="mt-2 text-base text-ink-900">Meet up, record feedback, and refine future preferences.</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="features" className="w-full py-16 px-6">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="text-2xl sm:text-3xl font-semibold mb-6">Features</h2>
-          <div className="grid sm:grid-cols-3 gap-4">
-            <div className="rounded-lg border p-4">
-              <p className="font-medium">Quality matches</p>
-              <p className="text-sm text-black/70 dark:text-white/70">2 curated matches weekly</p>
-            </div>
-            <div className="rounded-lg border p-4">
-              <p className="font-medium">Interest-first</p>
-              <p className="text-sm text-black/70 dark:text-white/70">Hobby compatibility</p>
-            </div>
-            <div className="rounded-lg border p-4">
-              <p className="font-medium">Local focus</p>
-              <p className="text-sm text-black/70 dark:text-white/70">Meet people nearby</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials placeholder per spec: display or keep lightweight placeholder until real content exists */}
-      <section id="testimonials" className="w-full py-16 px-6 bg-gray-50">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="text-2xl sm:text-3xl font-semibold mb-6">Testimonials</h2>
-          <div className="rounded-lg border p-6 bg-white">
-            <p className="text-sm text-black/70 dark:text-white/70">
-              Social proof coming soon. We&apos;ll showcase real stories from our community here.
+      <section id="features" className="rounded-[36px] border border-white/60 bg-white/85 px-8 py-12 shadow-[0_45px_120px_-60px_rgba(17,20,35,0.45)]">
+        <div className="space-y-8">
+          <div className="space-y-3">
+            <span className="eyebrow-pill border border-ink-100 bg-ink-50/60 text-ink-600">Product pillars</span>
+            <h2 className="font-heading text-3xl text-ink-900">Designed to feel calm, intentional, and on-theme.</h2>
+            <p className="max-w-2xl text-base text-ink-600">
+              Every surface follows the same palette, spacing scale, and typography so new features stay consistent.
             </p>
           </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {features.map((feature) => (
+              <div
+                key={feature.title}
+                className="flex h-full flex-col rounded-3xl border border-white/60 bg-sand-50/70 p-6 shadow-[0_30px_70px_-55px_rgba(17,20,35,0.65)]"
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">{feature.meta}</p>
+                <h3 className="mt-3 text-xl font-semibold text-ink-900">{feature.title}</h3>
+                <p className="mt-3 text-sm text-ink-600">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-10 grid gap-4 border-t border-white/60 pt-8 sm:grid-cols-3">
+          {rituals.map((ritual) => (
+            <div key={ritual.title} className="rounded-2xl border border-white/60 bg-white/80 p-4">
+              <p className="text-sm font-semibold text-ink-900">{ritual.title}</p>
+              <p className="text-sm text-ink-600">{ritual.detail}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      <section id="faq" className="w-full py-16 px-6 bg-gray-50">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="text-2xl sm:text-3xl font-semibold mb-6">FAQ</h2>
-          <div className="space-y-4 text-sm">
-            <div>
-              <p className="font-medium">How do matches work?</p>
-              <p className="text-black/70 dark:text-white/70">We recommend 2 people each week based on shared hobbies and location.</p>
-            </div>
-            <div>
-              <p className="font-medium">Is it free?</p>
-              <p className="text-black/70 dark:text-white/70">Yes for the MVP. We may introduce premium features later.</p>
-            </div>
-            <div>
-              <p className="font-medium">How do I sign up?</p>
-              <p className="text-black/70 dark:text-white/70">Use your email—no passwords. We’ll send you a magic link or OTP.</p>
-            </div>
+      <section id="testimonials" className="rounded-[36px] border border-brand-100 bg-gradient-to-br from-brand-50 via-white to-peach-50 px-8 py-12 shadow-[0_45px_120px_-60px_rgba(17,20,35,0.45)]">
+        <div className="space-y-4">
+          <span className="eyebrow-pill border border-brand-100 bg-brand-50/70 text-brand-700">Stories soon</span>
+          <h2 className="font-heading text-3xl text-ink-900">Social proof arrives with our first beta cohort.</h2>
+          <p className="max-w-3xl text-base text-ink-600">
+            We&apos;re collecting the first wave of community stories now. Expect tangible testimonials—photos, hobbies,
+            and outcomes—once pilots wrap. Until then, we keep the placeholder honest.
+          </p>
+          <div className="rounded-3xl border border-white/70 bg-white/80 p-6 text-sm text-ink-600">
+            Want to be featured? Share feedback after your first match cycle and we&apos;ll reach out.
           </div>
+        </div>
+      </section>
+
+      <section id="faq" className="rounded-[36px] border border-white/60 bg-white/85 px-8 py-12 shadow-[0_45px_120px_-60px_rgba(17,20,35,0.45)]">
+        <div className="space-y-3">
+          <span className="eyebrow-pill border border-sand-200 bg-sand-50/70 text-ink-600">FAQ</span>
+          <h2 className="font-heading text-3xl text-ink-900">Everything you need to know before joining.</h2>
+        </div>
+        <div className="mt-8 space-y-6">
+          {faq.map((item) => (
+            <div key={item.question} className="rounded-3xl border border-white/70 bg-white/80 p-5">
+              <p className="text-sm font-semibold text-ink-900">{item.question}</p>
+              <p className="mt-2 text-sm text-ink-600">{item.answer}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-[36px] border border-brand-100 bg-brand-50/60 px-8 py-12 text-center shadow-[0_45px_120px_-60px_rgba(124,58,237,0.45)]">
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-700">Ready when you are</p>
+        <h2 className="mt-4 font-heading text-3xl text-ink-900">Fix the UI, then keep shipping on-theme.</h2>
+        <p className="mt-3 text-base text-ink-700">
+          Finish your profile now so we can keep polishing flows that feel cohesive across web, mobile, and onboarding.
+        </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link
+            href="/signup"
+            className="inline-flex items-center justify-center rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-[0_25px_60px_-25px_rgba(124,58,237,0.75)] transition hover:-translate-y-0.5 hover:bg-brand-500"
+          >
+            Build my profile
+          </Link>
+          <Link
+            href="/login"
+            className="inline-flex items-center justify-center rounded-full border border-brand-200 bg-white/80 px-6 py-3 text-sm font-semibold text-brand-700 transition hover:-translate-y-0.5 hover:text-brand-600"
+          >
+            I already have access
+          </Link>
         </div>
       </section>
     </main>

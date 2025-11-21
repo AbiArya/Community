@@ -112,7 +112,7 @@ export function ProfileView() {
           </button>
           <button
             onClick={() => setIsEditing(true)}
-            className="px-4 py-2 text-sm bg-black text-white rounded-lg hover:bg-gray-800"
+            className="px-4 py-2 text-sm font-semibold !text-white rounded-lg bg-gradient-to-r from-[#8b30ff] to-[#ff712b] shadow-md hover:from-[#7a21ef] hover:to-[#f85a0a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8b30ff]"
           >
             Edit Profile
           </button>
@@ -183,18 +183,14 @@ export function ProfileView() {
       {/* Preferences Section */}
       <div className="space-y-3">
         <h2 className="text-lg font-medium">Matching Preferences</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-4 bg-gray-50 rounded-lg">
             <h3 className="font-medium text-sm text-gray-600">Age Range</h3>
             <p className="text-lg">{profile.age_range_min} - {profile.age_range_max}</p>
           </div>
           <div className="p-4 bg-gray-50 rounded-lg">
             <h3 className="font-medium text-sm text-gray-600">Distance</h3>
-            <p className="text-lg">{profile.distance_radius} km</p>
-          </div>
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-medium text-sm text-gray-600">Match Frequency</h3>
-            <p className="text-lg">{profile.match_frequency} per week</p>
+            <p className="text-lg">{Math.round(profile.distance_radius * 0.621371)} miles</p>
           </div>
         </div>
       </div>

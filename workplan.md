@@ -12,6 +12,12 @@ A friend-matching web application that connects users based on shared hobbies an
 - **Deployment**: Vercel
 - **Version Control**: Git/GitHub
 
+## Current Focus: UI Refresh & Theme Consistency
+- Prioritize fixing visual issues across existing flows before shipping new features.
+- Align every page with a cohesive color palette, typography scale, and spacing rhythm.
+- Leverage Tailwind tokens and reusable components to keep future work "on theme."
+- Use this UI pass to tighten responsiveness, accessibility, and perceived polish.
+
 ## Development Phases
 
 ### Phase 1: Foundation & Setup ⏳
@@ -86,27 +92,35 @@ A friend-matching web application that connects users based on shared hobbies an
 - [x] Complete Profile action sets `is_profile_complete = true` and saves bio/preferences
 
 #### Milestone 4.2: Profile Display & Editing
-- [ ] Design profile view page
-- [ ] Implement profile editing interface
-- [ ] Add photo management (add/remove/reorder)
-- [ ] Create hobby editing with drag-and-drop ranking
-- [ ] Add profile preview functionality
+- [x] Design profile view page
+- [x] Implement profile editing interface
+- [x] Add photo management (add/remove/reorder)
+- [x] Create hobby editing with up/down ranking
+- [x] Add profile preview functionality
 
 ### Phase 5: Settings & Account Management ⏳
 **Timeline**: Week 4
 
 #### Milestone 5.1: Settings Page
-- [ ] Create account settings interface
+- [x] Create account settings interface
 - [x] Add phone number change functionality
-- [x] Implement match frequency preferences (1-5 per week)
-- [ ] Add age range and distance preferences
-- [ ] Create account deletion option
+- [x] Add age range and distance preferences
+- [x] Create account deletion option
+- Note: Match frequency is fixed at 2 per week (not user-configurable)
 
 #### Milestone 5.2: Data Management
 - [ ] Implement profile data backup
 - [ ] Add data export functionality
 - [ ] Create profile completion tracking
 - [ ] Add user onboarding checklist
+
+#### Milestone 5.3: UI Refresh & Theming ⏳
+- [ ] Run full UI audit to catalog visual inconsistencies and usability gaps
+- [ ] Define updated color palette, typography scale, and spacing tokens
+- [ ] Create reusable Tailwind theme tokens and component variants that match the refreshed look
+- [ ] Update existing pages (landing, profile, settings, matches) to the unified theme
+- [ ] Add lightweight style guide that documents patterns/components for future features
+- [ ] Validate refreshed UI on mobile + desktop to ensure parity
 
 ### Phase 6: Matching Algorithm & System ⏳
 **Timeline**: Week 5-6
@@ -173,7 +187,11 @@ users (
   updated_at TIMESTAMP,
   full_name VARCHAR,
   bio TEXT,
-  location VARCHAR,
+  location VARCHAR,  -- Deprecated: use zipcode instead
+  zipcode VARCHAR(10),
+  latitude DECIMAL(10, 8),
+  longitude DECIMAL(11, 8),
+  location_point GEOGRAPHY(POINT, 4326),  -- PostGIS for distance queries
   age INTEGER,
   is_profile_complete BOOLEAN DEFAULT false,
   last_active TIMESTAMP,
@@ -265,14 +283,15 @@ src/
 - **Hobby Selection**: Choose from predefined list + custom additions
 - **Hobby Ranking**: Drag-and-drop interface for preference ordering
 - **Bio**: 500 character limit with rich text support
-- **Location**: City/region for proximity matching
+- **Location**: US zipcode-based with PostGIS for accurate distance matching (like Hinge)
 
 #### Matching Algorithm
 - **Hobby Similarity**: Weighted scoring based on shared interests and rankings
-- **Geographic Proximity**: Prioritize local connections
+- **Geographic Proximity**: PostGIS-powered distance matching using zipcodes
 - **Weekly Cadence**: 2 matches delivered every Monday
 - **Diversity**: Prevent repeated similar matches
 - **Mutual Exclusion**: No duplicate matches between users
+- **Distance Queries**: Efficient radius-based filtering with spatial indexes
 
 #### User Experience
 - **Onboarding**: Step-by-step profile creation with progress tracking
@@ -280,13 +299,18 @@ src/
 - **Messaging**: Basic chat initiation for accepted matches
 - **Settings**: Granular control over matching preferences
 
-## Current Status: Phase 5 - Settings & Account Management
-**Next Actions (Phase 4.2)**:
-- [ ] Persist photos to Supabase Storage and `user_photos`
-- [ ] Seed predefined `hobbies`; persist selections to `user_hobbies`
-- [ ] Build profile view page (reads user, photos, hobbies)
-- [ ] Implement editing UI (bio, preferences, photo reorder, hobby re-rank)
-- [ ] Add tests (unit for components, e2e for setup → complete → view)
+## Current Status: Phase 5.3 - UI Refresh & Theming (In Progress)
+**Completed in Phase 4 & 5**:
+- [x] Photos persisted to Supabase Storage and `user_photos` table
+- [x] Predefined hobbies seeded; selections persist to `user_hobbies`
+- [x] Profile view page built (displays user, photos, hobbies)
+- [x] Profile editing UI (bio, preferences, photo reorder, hobby re-rank)
+- [x] Unit tests for profile and settings components
+- [x] Account settings with phone number management
+- [x] Matching preferences (age range, distance)
+- [x] Account deletion functionality
+
+**Next Phase: Phase 6 - Matching Algorithm & System (starts after UI refresh solidifies the new visual direction)**
 
 ## Risk Assessment
 - **High Risk**: Matching algorithm accuracy and user satisfaction

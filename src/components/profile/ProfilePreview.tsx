@@ -159,8 +159,7 @@ export function ProfilePreview() {
             <h4 className="font-medium text-sm text-gray-700 mb-2">Looking for</h4>
             <div className="text-xs text-gray-600 space-y-1">
               <p>Age: {profile.age_range_min} - {profile.age_range_max}</p>
-              <p>Within {profile.distance_radius} km</p>
-              <p>{profile.match_frequency} matches per week</p>
+              <p>Within {Math.round(profile.distance_radius * 0.621371)} miles</p>
             </div>
           </div>
         </div>
