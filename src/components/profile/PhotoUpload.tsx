@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
+import { useDragReorder } from "@/hooks/useDragReorder";
 
 export interface UploadedPhoto {
   id: string;
@@ -64,17 +65,27 @@ export function PhotoUpload({ photos, onChange, maxPhotos = 3 }: PhotoUploadProp
     [photos, onChange, maxPhotos]
   );
 
+  const handleReorder = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      const newPhotos = [...photos];
+      const [draggedPhoto] = newPhotos.splice(fromIndex, 1);
+      newPhotos.splice(toIndex, 0, draggedPhoto);
+
+      // Update primary status - first photo is always primary
+      const updated = newPhotos.map((p, idx) => ({ ...p, isPrimary: idx === 0 }));
+      onChange(updated);
+    },
+    [photos, onChange]
+  );
+
+  const { handleDragStart, handleDragOver, handleDragLeave, handleDragEnd, getDragClassName } =
+    useDragReorder(photos, handleReorder);
+
   function removePhoto(id: string) {
     const filtered = photos.filter((p) => p.id !== id);
-    // Ensure one remains primary
-    if (!filtered.some((p) => p.isPrimary) && filtered.length > 0) {
-      filtered[0] = { ...filtered[0], isPrimary: true };
-    }
-    onChange(filtered);
-  }
-
-  function setPrimary(id: string) {
-    onChange(photos.map((p) => ({ ...p, isPrimary: p.id === id })));
+    // Update primary status - first photo is always primary
+    const updated = filtered.map((p, idx) => ({ ...p, isPrimary: idx === 0 }));
+    onChange(updated);
   }
 
   return (
@@ -86,10 +97,17 @@ export function PhotoUpload({ photos, onChange, maxPhotos = 3 }: PhotoUploadProp
           accept={acceptAttr}
           multiple
           onChange={(e) => addFiles(e.currentTarget.files)}
-          className="block text-sm"
+          className="hidden"
           aria-label="Upload photos"
         />
-        <span className="text-xs text-black/70 dark:text-white/70">{remaining} remaining (max {maxPhotos})</span>
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="px-4 py-2 text-sm font-medium rounded border border-gray-300 bg-white hover:bg-gray-50 cursor-pointer"
+        >
+          Choose Files
+        </button>
+        <span className="text-xs text-gray-600">{remaining} remaining (max {maxPhotos})</span>
       </div>
 
       {error && (
@@ -97,34 +115,49 @@ export function PhotoUpload({ photos, onChange, maxPhotos = 3 }: PhotoUploadProp
       )}
 
       {photos.length > 0 ? (
-        <ul className="grid sm:grid-cols-3 gap-4">
-          {photos.map((p) => (
-            <li key={p.id} className="border rounded-lg overflow-hidden">
-              <div className="aspect-square bg-gray-50 relative">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.url} alt="Uploaded" className="w-full h-full object-cover" />
-              </div>
-              <div className="p-2 flex items-center justify-between gap-2">
-                <button
-                  className={`px-2 py-1 text-xs rounded ${p.isPrimary ? "bg-black text-white" : "border"}`}
-                  onClick={() => setPrimary(p.id)}
-                  aria-pressed={p.isPrimary}
-                >
-                  {p.isPrimary ? "Primary" : "Make primary"}
-                </button>
-                <button
-                  className="px-2 py-1 text-xs rounded border"
-                  onClick={() => removePhoto(p.id)}
-                  aria-label="Remove photo"
-                >
-                  Remove
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <div>
+          <p className="text-xs text-gray-600 mb-2">Drag to reorder • First photo is your primary photo</p>
+          <ul className="grid sm:grid-cols-3 gap-4">
+            {photos.map((p, index) => (
+              <li
+                key={p.id}
+                draggable
+                onDragStart={() => handleDragStart(index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDragEnd={handleDragEnd}
+                onDragLeave={handleDragLeave}
+                className={`border border-gray-300 rounded-lg overflow-hidden bg-white shadow-sm cursor-move transition-all ${getDragClassName(
+                  index
+                )}`}
+              >
+                <div className="aspect-square bg-gray-50 relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img 
+                    src={p.url} 
+                    alt={p.isPrimary ? "Primary photo" : "Uploaded photo"} 
+                    className="w-full h-full object-cover pointer-events-none" 
+                  />
+                  {p.isPrimary && (
+                    <div className="absolute top-2 left-2 bg-black text-white px-2 py-1 rounded text-xs font-medium">
+                      ★ Primary
+                    </div>
+                  )}
+                  <button
+                    className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700 shadow-md font-bold"
+                    onClick={() => removePhoto(p.id)}
+                    aria-label="Remove photo"
+                    title="Remove photo"
+                    style={{ color: '#ffffff' }}
+                  >
+                    ×
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : (
-        <p className="text-sm text-black/70 dark:text-white/70">No photos added yet.</p>
+        <p className="text-sm text-gray-600">No photos added yet.</p>
       )}
     </div>
   );

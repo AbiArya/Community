@@ -25,8 +25,8 @@ export function DescriptionStep({ value, onChange, name, onNameChange, age, onAg
   
   return (
     <div className="space-y-3">
-      <p className="font-medium">About you</p>
-      <p className="text-sm text-black/70 dark:text-white/70">Tell us about yourself.</p>
+      <p className="font-medium text-gray-900">About you</p>
+      <p className="text-sm text-gray-600">Tell us about yourself.</p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -38,7 +38,7 @@ export function DescriptionStep({ value, onChange, name, onNameChange, age, onAg
             id="full_name"
             value={name}
             onChange={(e) => onNameChange(e.target.value)}
-            className="w-full border rounded px-3 py-2 text-sm"
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:border-gray-500 focus:outline-none"
             placeholder="Enter your full name"
             autoComplete="name"
             required
@@ -54,7 +54,7 @@ export function DescriptionStep({ value, onChange, name, onNameChange, age, onAg
             id="age"
             value={age}
             onChange={handleAgeChange}
-            className="w-full border rounded px-3 py-2 text-sm"
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:border-gray-500 focus:outline-none"
             placeholder="Enter your age"
             min="18"
             max="100"
@@ -71,12 +71,12 @@ export function DescriptionStep({ value, onChange, name, onNameChange, age, onAg
           id="bio"
           value={value}
           onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
-          className="w-full border rounded px-3 py-2 text-sm min-h-32"
+          className="w-full border border-gray-300 rounded px-3 py-2 text-sm min-h-32 bg-white focus:border-gray-500 focus:outline-none"
           placeholder="I love weekend hikes and board games. Looking to meet people for..."
           aria-describedby="bio-counter"
           autoComplete="off"
         />
-        <div id="bio-counter" className="text-xs text-black/60 dark:text-white/60">{remaining} characters left</div>
+        <div id="bio-counter" className="text-xs text-gray-500">{remaining} characters left</div>
       </div>
     </div>
   );

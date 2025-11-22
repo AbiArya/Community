@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useAuthSession } from "@/hooks/useAuthSession";
 import { useProfileData } from "@/hooks/useProfileData";
+import { useDragReorder } from "@/hooks/useDragReorder";
 
 interface PhotoManagementProps {
   onUpdate?: () => void;
@@ -160,48 +161,6 @@ export function PhotoManagement({ onUpdate }: PhotoManagementProps) {
     }
   }, [session, profile, refresh, onUpdate]);
 
-  const handleSetPrimary = useCallback(async (photoId: string) => {
-    if (!session) return;
-    
-    setError(null);
-    setIsReordering(true);
-
-    try {
-      const supabase = getSupabaseBrowserClient();
-      
-      // First, unset all primary photos
-      const { error: unsetError } = await supabase
-        .from("user_photos")
-        .update({ is_primary: false })
-        .eq("user_id", session.user.id);
-        
-      if (unsetError) {
-        throw new Error(`Failed to update photos: ${unsetError.message}`);
-      }
-      
-      // Then set the selected photo as primary
-      const { error: setError } = await supabase
-        .from("user_photos")
-        .update({ is_primary: true })
-        .eq("id", photoId);
-        
-      if (setError) {
-        throw new Error(`Failed to set primary photo: ${setError.message}`);
-      }
-
-      setSuccess("Primary photo updated");
-      refresh();
-      onUpdate?.();
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setIsReordering(false);
-    }
-  }, [session, refresh, onUpdate]);
-
   const handleReorder = useCallback(async (fromIndex: number, toIndex: number) => {
     if (!session || !profile) return;
     
@@ -216,16 +175,21 @@ export function PhotoManagement({ onUpdate }: PhotoManagementProps) {
       const [movedPhoto] = photos.splice(fromIndex, 1);
       photos.splice(toIndex, 0, movedPhoto);
       
-      // Update display_order for all photos
+      // Update display_order and primary status for all photos
+      // First photo is always primary
       const updates = photos.map((photo, index) => ({
         id: photo.id,
         display_order: index,
+        is_primary: index === 0,
       }));
       
       for (const update of updates) {
         const { error } = await supabase
           .from("user_photos")
-          .update({ display_order: update.display_order })
+          .update({ 
+            display_order: update.display_order,
+            is_primary: update.is_primary,
+          })
           .eq("id", update.id);
           
         if (error) {
@@ -233,12 +197,8 @@ export function PhotoManagement({ onUpdate }: PhotoManagementProps) {
         }
       }
 
-      setSuccess("Photos reordered successfully");
       refresh();
       onUpdate?.();
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(null), 3000);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -246,11 +206,14 @@ export function PhotoManagement({ onUpdate }: PhotoManagementProps) {
     }
   }, [session, profile, refresh, onUpdate]);
 
+  const sortedPhotos = profile?.photos ? [...profile.photos].sort((a, b) => a.display_order - b.display_order) : [];
+
+  const { handleDragStart, handleDragOver, handleDragLeave, handleDragEnd, getDragClassName } =
+    useDragReorder(sortedPhotos, handleReorder);
+
   if (!profile) {
     return <div>Loading...</div>;
   }
-
-  const sortedPhotos = [...profile.photos].sort((a, b) => a.display_order - b.display_order);
 
   return (
     <div className="space-y-4">
@@ -261,106 +224,78 @@ export function PhotoManagement({ onUpdate }: PhotoManagementProps) {
         </div>
       )}
 
-      {success && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-green-800">{success}</p>
-        </div>
+      {/* Upload Section */}
+      <div className="flex items-center gap-3">
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*,image/heic,image/heif"
+          multiple
+          onChange={(e) => handleFileUpload(e.currentTarget.files)}
+          className="hidden"
+          aria-label="Upload photos"
+          disabled={isUploading || sortedPhotos.length >= 3}
+        />
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={isUploading || sortedPhotos.length >= 3}
+          className="px-4 py-2 text-sm font-medium rounded border border-gray-300 bg-white hover:bg-gray-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Choose Files
+        </button>
+        <span className="text-xs text-gray-600">
+          {3 - sortedPhotos.length} remaining (max 3, 2MB each)
+        </span>
+      </div>
+      {isUploading && (
+        <p className="text-sm text-blue-600">Uploading photos...</p>
       )}
 
-      {/* Upload Section */}
-      <div className="space-y-3">
-        <h3 className="text-lg font-medium">Add Photos</h3>
-        <div className="flex items-center gap-3">
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*,image/heic,image/heif"
-            multiple
-            onChange={(e) => handleFileUpload(e.currentTarget.files)}
-            className="block text-sm"
-            aria-label="Upload photos"
-            disabled={isUploading || sortedPhotos.length >= 3}
-          />
-          <span className="text-xs text-gray-500">
-            {sortedPhotos.length}/3 photos (max 2MB each)
-          </span>
-        </div>
-        {isUploading && (
-          <p className="text-sm text-blue-600">Uploading photos...</p>
-        )}
-      </div>
-
-      {/* Photos Grid */}
-      {sortedPhotos.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-lg font-medium">Your Photos</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Photos Grid with Drag & Drop */}
+      {sortedPhotos.length > 0 ? (
+        <div>
+          <p className="text-xs text-gray-600 mb-2">Drag to reorder • First photo is your primary photo</p>
+          <div className="grid sm:grid-cols-3 gap-4">
             {sortedPhotos.map((photo, index) => (
-              <div key={photo.id} className="relative border rounded-lg overflow-hidden">
+              <div
+                key={photo.id}
+                draggable
+                onDragStart={() => handleDragStart(index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDragEnd={handleDragEnd}
+                onDragLeave={handleDragLeave}
+                className={`border border-gray-300 rounded-lg overflow-hidden bg-white shadow-sm cursor-move transition-all ${getDragClassName(
+                  index
+                )}`}
+              >
                 <div className="aspect-square bg-gray-50 relative">
                   <img
                     src={photo.photo_url}
-                    alt={`Profile photo ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    alt={photo.is_primary ? "Primary photo" : "Profile photo"}
+                    className="w-full h-full object-cover pointer-events-none"
                   />
                   {photo.is_primary && (
-                    <span className="absolute top-2 left-2 px-2 py-1 text-xs bg-black text-white rounded">
-                      Primary
-                    </span>
-                  )}
-                </div>
-                <div className="p-3 space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <button
-                      className={`px-3 py-1 text-xs rounded ${
-                        photo.is_primary 
-                          ? "bg-black text-white" 
-                          : "border border-gray-300 hover:bg-gray-50"
-                      }`}
-                      onClick={() => handleSetPrimary(photo.id)}
-                      disabled={isReordering}
-                    >
-                      {photo.is_primary ? "Primary" : "Make Primary"}
-                    </button>
-                    <button
-                      className="px-3 py-1 text-xs rounded border border-red-300 text-red-600 hover:bg-red-50"
-                      onClick={() => handleDeletePhoto(photo.id, photo.photo_url)}
-                      disabled={isDeleting === photo.id}
-                    >
-                      {isDeleting === photo.id ? "Deleting..." : "Delete"}
-                    </button>
-                  </div>
-                  
-                  {/* Reorder buttons */}
-                  {sortedPhotos.length > 1 && (
-                    <div className="flex items-center justify-center gap-1">
-                      <button
-                        className="px-2 py-1 text-xs rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
-                        onClick={() => handleReorder(index, index - 1)}
-                        disabled={index === 0 || isReordering}
-                      >
-                        ↑
-                      </button>
-                      <span className="text-xs text-gray-500 px-2">
-                        {index + 1}
-                      </span>
-                      <button
-                        className="px-2 py-1 text-xs rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
-                        onClick={() => handleReorder(index, index + 1)}
-                        disabled={index === sortedPhotos.length - 1 || isReordering}
-                      >
-                        ↓
-                      </button>
+                    <div className="absolute top-2 left-2 bg-black text-white px-2 py-1 rounded text-xs font-medium">
+                      ★ Primary
                     </div>
                   )}
+                  <button
+                    className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700 shadow-md font-bold"
+                    onClick={() => handleDeletePhoto(photo.id, photo.photo_url)}
+                    disabled={isDeleting === photo.id}
+                    aria-label="Remove photo"
+                    title="Remove photo"
+                    style={{ color: '#ffffff' }}
+                  >
+                    {isDeleting === photo.id ? '...' : '×'}
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      )}
-
-      {sortedPhotos.length === 0 && (
+      ) : (
         <div className="p-8 border-2 border-dashed border-gray-300 rounded-lg text-center">
           <p className="text-gray-500">No photos uploaded yet</p>
           <p className="text-sm text-gray-400 mt-1">Upload your first photo to get started</p>

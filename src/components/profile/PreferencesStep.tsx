@@ -7,14 +7,14 @@ interface Preferences {
   zipcode: string;
   ageMin: number;
   ageMax: number;
-  distanceKm: number;
+  distanceMiles: number;
 }
 
 interface PreferencesStepState {
   zipcode: string;
   ageMin: string;
   ageMax: string;
-  distanceKm: string;
+  distanceMiles: string;
 }
 
 interface PreferencesStepProps {
@@ -27,7 +27,7 @@ export function PreferencesStep({ value, onChange }: PreferencesStepProps) {
     zipcode: value.zipcode || "",
     ageMin: value.ageMin.toString(),
     ageMax: value.ageMax.toString(),
-    distanceKm: value.distanceKm.toString(),
+    distanceMiles: value.distanceMiles.toString(),
   });
   const [zipcodeError, setZipcodeError] = useState<string>("");
   const [locationDisplay, setLocationDisplay] = useState<string>("");
@@ -73,7 +73,7 @@ export function PreferencesStep({ value, onChange }: PreferencesStepProps) {
       zipcode: localState.zipcode.trim(),
       ageMin: Math.max(18, Math.min(100, Number(localState.ageMin) || 18)),
       ageMax: Math.max(18, Math.min(100, Number(localState.ageMax) || 100)),
-      distanceKm: Math.max(1, Math.min(200, Number(localState.distanceKm) || 1)),
+      distanceMiles: Math.max(1, Math.min(200, Number(localState.distanceMiles) || 1)),
     };
     
     // Only update parent if zipcode is valid
@@ -84,8 +84,8 @@ export function PreferencesStep({ value, onChange }: PreferencesStepProps) {
 
   return (
     <div className="space-y-4">
-      <p className="font-medium">Location & Preferences</p>
-      <p className="text-sm text-black/70 dark:text-white/70">
+      <p className="font-medium text-gray-900">Location & Preferences</p>
+      <p className="text-sm text-gray-600">
         We use your zipcode for distance-based matching, similar to apps like Hinge.
       </p>
       
@@ -104,7 +104,7 @@ export function PreferencesStep({ value, onChange }: PreferencesStepProps) {
               syncToParent();
             }}
             placeholder="e.g., 94102"
-            className={`w-full border rounded px-3 py-2 ${zipcodeError ? 'border-red-500' : ''}`}
+            className={`w-full border rounded px-3 py-2 bg-white focus:outline-none ${zipcodeError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-gray-500'}`}
             maxLength={10}
             autoComplete="postal-code"
           />
@@ -119,7 +119,7 @@ export function PreferencesStep({ value, onChange }: PreferencesStepProps) {
         {/* Matching preferences */}
         <div className="grid sm:grid-cols-2 gap-4">
           <label className="text-sm space-y-1">
-            <span>Age range min</span>
+            <span className="text-gray-700">Age range min</span>
             <input
               type="number"
               value={localState.ageMin}
@@ -131,12 +131,12 @@ export function PreferencesStep({ value, onChange }: PreferencesStepProps) {
               onBlur={() => {
                 syncToParent();
               }}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:border-gray-500 focus:outline-none"
               autoComplete="off"
             />
           </label>
           <label className="text-sm space-y-1">
-            <span>Age range max</span>
+            <span className="text-gray-700">Age range max</span>
             <input
               type="number"
               value={localState.ageMax}
@@ -148,24 +148,24 @@ export function PreferencesStep({ value, onChange }: PreferencesStepProps) {
               onBlur={() => {
                 syncToParent();
               }}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:border-gray-500 focus:outline-none"
               autoComplete="off"
             />
           </label>
           <label className="text-sm space-y-1">
-            <span>Distance radius (km)</span>
+            <span className="text-gray-700">Distance radius (miles)</span>
             <input
               type="number"
-              value={localState.distanceKm}
+              value={localState.distanceMiles}
               min={1}
               max={200}
               onChange={(e) => {
-                updateLocal("distanceKm", e.target.value);
+                updateLocal("distanceMiles", e.target.value);
               }}
               onBlur={() => {
                 syncToParent();
               }}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:border-gray-500 focus:outline-none"
               autoComplete="off"
             />
           </label>

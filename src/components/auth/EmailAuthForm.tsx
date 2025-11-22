@@ -22,7 +22,7 @@ export function EmailAuthForm({ mode }: EmailAuthFormProps) {
 
   const redirectTarget = useMemo(() => {
     const intended = searchParams?.get("redirect");
-    return intended || "/";
+    return intended || "/profile";
   }, [searchParams]);
 
   const emailRedirectTo = useMemo(() => {

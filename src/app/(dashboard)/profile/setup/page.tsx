@@ -9,8 +9,10 @@ export default function ProfileSetupPage() {
     <Suspense>
       <AuthGuard>
         <main className="mx-auto max-w-3xl w-full p-6 space-y-6">
-          <h1 className="text-2xl font-semibold">Set up your profile</h1>
-          <ProfileWizard />
+          <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+            <h1 className="text-2xl font-semibold text-gray-900">Set up your profile</h1>
+            <ProfileWizard />
+          </div>
         </main>
       </AuthGuard>
     </Suspense>

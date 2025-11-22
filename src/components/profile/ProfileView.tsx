@@ -9,9 +9,6 @@ export function ProfileView() {
   const { data: profile, isLoading, error, refresh } = useProfileData();
   const [isEditing, setIsEditing] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
-
-  // Debug log to see what profile data we're rendering
-  console.log('ProfileView rendering with profile data:', profile);
   
   // Use updated_at as a key to force re-render when profile changes
   const profileKey = profile?.updated_at || 'no-profile';
@@ -66,7 +63,6 @@ export function ProfileView() {
           </button>
         </div>
         <ProfileEdit onSaveSuccess={() => {
-          console.log('Save success callback triggered, exiting edit mode...');
           // Force refresh the profile data before exiting edit mode
           refresh();
           setTimeout(() => {
@@ -190,7 +186,7 @@ export function ProfileView() {
           </div>
           <div className="p-4 bg-gray-50 rounded-lg">
             <h3 className="font-medium text-sm text-gray-600">Distance</h3>
-            <p className="text-lg">{Math.round(profile.distance_radius * 0.621371)} miles</p>
+            <p className="text-lg">{profile.distance_radius} miles</p>
           </div>
         </div>
       </div>

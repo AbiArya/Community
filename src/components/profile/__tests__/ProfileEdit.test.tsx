@@ -48,7 +48,7 @@ describe("ProfileEdit", () => {
     full_name: "John Doe",
     email: "john@example.com",
     bio: "I love hiking and photography",
-    location: "San Francisco",
+    zipcode: "94102",
     age: 28,
     age_range_min: 25,
     age_range_max: 35,
@@ -127,7 +127,7 @@ describe("ProfileEdit", () => {
     
     expect(screen.getByDisplayValue("John Doe")).toBeInTheDocument();
     expect(screen.getByDisplayValue("I love hiking and photography")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("San Francisco")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("94102")).toBeInTheDocument();
     expect(screen.getByDisplayValue("28")).toBeInTheDocument();
   });
 

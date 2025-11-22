@@ -70,7 +70,7 @@ describe("MatchingPreferences", () => {
     render(<MatchingPreferences />);
     
     expect(screen.getByText(/Matches will be within ages 25 to 35/)).toBeInTheDocument();
-    expect(screen.getByText(/Find friends within 50 kilometers/)).toBeInTheDocument();
+    expect(screen.getByText(/Find friends within 50 miles/)).toBeInTheDocument();
     expect(screen.getByText(/2 matches/)).toBeInTheDocument();
   });
 
@@ -107,7 +107,7 @@ describe("MatchingPreferences", () => {
     const distanceSlider = screen.getByRole("slider");
     fireEvent.change(distanceSlider, { target: { value: "75" } });
     
-    expect(screen.getByText(/Find friends within 75 kilometers of your location/)).toBeInTheDocument();
+    expect(screen.getByText(/Find friends within 75 miles of your location/)).toBeInTheDocument();
   });
 
   test("saves preferences successfully", async () => {

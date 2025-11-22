@@ -138,7 +138,7 @@ export function MatchingPreferences() {
       {/* Distance Radius */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Distance Radius (kilometers)
+          Distance Radius (miles)
         </label>
         <div className="space-y-2">
           <input
@@ -155,13 +155,13 @@ export function MatchingPreferences() {
             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
           />
           <div className="flex justify-between text-xs text-gray-500">
-            <span>5 km</span>
-            <span className="font-semibold text-blue-600">{distanceRadius} km</span>
-            <span>100 km</span>
+            <span>5 miles</span>
+            <span className="font-semibold text-blue-600">{distanceRadius} miles</span>
+            <span>100 miles</span>
           </div>
         </div>
         <p className="mt-1 text-xs text-gray-500">
-          Find friends within {distanceRadius} kilometers of your location
+          Find friends within {distanceRadius} miles of your location
         </p>
       </div>
 

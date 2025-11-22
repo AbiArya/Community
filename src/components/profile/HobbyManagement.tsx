@@ -31,6 +31,7 @@ export function HobbyManagement({ onUpdate, onHobbiesChange }: HobbyManagementPr
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   // Fetch all available hobbies
   const fetchHobbies = useCallback(async () => {
@@ -110,6 +111,40 @@ export function HobbyManagement({ onUpdate, onHobbiesChange }: HobbyManagementPr
     setLocalUserHobbies(reranked);
   }, [sortedUserHobbies]);
 
+  const handleDragStart = useCallback((e: React.DragEvent, index: number) => {
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", index.toString());
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
+    setDragOverIndex(null);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const handleDragEnter = useCallback((e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    setDragOverIndex(targetIndex);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    // Only clear if we're leaving the item entirely (not entering a child)
+    if (e.currentTarget === e.target) {
+      setDragOverIndex(null);
+    }
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    setDragOverIndex(null);
+    const draggedIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+    if (draggedIndex === targetIndex || isNaN(draggedIndex)) return;
+    moveHobby(draggedIndex, targetIndex);
+  }, [moveHobby]);
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -188,44 +223,36 @@ export function HobbyManagement({ onUpdate, onHobbiesChange }: HobbyManagementPr
           ) : (
             <div className="space-y-2">
               {sortedUserHobbies.map((userHobby, index) => (
-                <div
-                  key={userHobby.id}
-                  className="flex items-center justify-between p-3 border border-gray-300 rounded-lg"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium">
-                      {index + 1}
-                    </span>
-                    <div>
-                      <div className="font-medium">{userHobby.hobby.name}</div>
-                      <div className="text-sm text-gray-500">{userHobby.hobby.category}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {/* Reorder buttons */}
-                    <button
-                      className="px-2 py-1 text-xs rounded border border-gray-300 hover:bg-gray-50"
-                      onClick={() => moveHobby(index, index - 1)}
-                      disabled={index === 0}
-                      title="Move up"
-                    >
-                      ↑
-                    </button>
-                    <button
-                      className="px-2 py-1 text-xs rounded border border-gray-300 hover:bg-gray-50"
-                      onClick={() => moveHobby(index, index + 1)}
-                      disabled={index === sortedUserHobbies.length - 1}
-                      title="Move down"
-                    >
-                      ↓
-                    </button>
-                    <button
-                      className="px-2 py-1 text-xs rounded border border-red-300 text-red-600 hover:bg-red-50"
+                <div key={userHobby.id} className="relative">
+                  {/* Drop indicator */}
+                  {dragOverIndex === index && (
+                    <div className="absolute -top-1 left-0 right-0 h-0.5 bg-gray-400 z-10" />
+                  )}
+                  <div
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={handleDragOver}
+                    onDragEnter={(e) => handleDragEnter(e, index)}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, index)}
+                    className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg relative cursor-move hover:border-gray-400 transition-colors"
+                  >
+                    <button 
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-base font-bold leading-none transition-colors shadow-sm z-10"
                       onClick={() => removeHobby(userHobby.id)}
                       title="Remove hobby"
+                      aria-label="Remove hobby"
                     >
-                      Remove
+                      ×
                     </button>
+                    <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0">
+                      {index + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium truncate">{userHobby.hobby.name}</div>
+                      <div className="text-sm text-gray-500 truncate">{userHobby.hobby.category}</div>
+                    </div>
                   </div>
                 </div>
               ))}

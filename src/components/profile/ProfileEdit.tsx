@@ -1,6 +1,6 @@
 "use client";
 
-import { useProfileData } from "@/hooks/useProfileData";
+import { useProfileData, type UserHobby } from "@/hooks/useProfileData";
 import { useState, useEffect } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useAuthSession } from "@/hooks/useAuthSession";
@@ -167,7 +167,6 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
       await saveHobbyChanges();
 
       setSaveSuccess(true);
-      console.log('Profile saved successfully, calling onSaveSuccess callback...');
       
       // Wait a moment for database consistency
       await new Promise(resolve => setTimeout(resolve, 200));
@@ -187,8 +186,6 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
 
     const supabase = getSupabaseBrowserClient();
     
-    console.log('Saving hobby changes, localHobbies:', localHobbies);
-    
     // Get current hobbies from database
     const { data: currentHobbies, error: fetchError } = await supabase
       .from("user_hobbies")
@@ -198,8 +195,6 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
     if (fetchError) {
       throw new Error(`Failed to fetch current hobbies: ${fetchError.message}`);
     }
-
-    console.log('Current hobbies in database:', currentHobbies);
 
     // Delete all current hobbies
     if (currentHobbies && currentHobbies.length > 0) {
@@ -211,7 +206,6 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
       if (deleteError) {
         throw new Error(`Failed to delete current hobbies: ${deleteError.message}`);
       }
-      console.log('Deleted current hobbies');
     }
 
     // Insert new hobbies
@@ -222,8 +216,6 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
         preference_rank: hobby.preference_rank,
       }));
 
-      console.log('Inserting hobbies:', hobbiesToInsert);
-
       const { error: insertError } = await supabase
         .from("user_hobbies")
         .insert(hobbiesToInsert);
@@ -232,9 +224,6 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
         console.error('Hobby insert error:', insertError);
         throw new Error(`Failed to save hobbies: ${insertError.message}`);
       }
-      console.log('Successfully inserted hobbies');
-    } else {
-      console.log('No hobbies to insert');
     }
   };
 
@@ -276,20 +265,6 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Edit Profile</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="px-4 py-2 text-sm bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50"
-          >
-            {isSaving ? "Saving..." : "Save Changes"}
-          </button>
-        </div>
-      </div>
-
       {/* Status Messages */}
       {saveError && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -433,7 +408,7 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
           </div>
           <div>
             <label htmlFor="distance_radius" className="block text-sm font-medium text-gray-700 mb-1">
-              Distance (km)
+              Distance (miles)
             </label>
             <input
               type="number"
@@ -453,7 +428,7 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50"
+          className="px-6 py-2 font-medium bg-black !text-white rounded-lg hover:bg-gray-800 disabled:opacity-50"
         >
           {isSaving ? "Saving..." : "Save Changes"}
         </button>

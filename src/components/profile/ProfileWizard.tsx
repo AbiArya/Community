@@ -19,7 +19,7 @@ export function ProfileWizard() {
   const [name, setName] = useState<string>("");
   const [age, setAge] = useState<string>("");
   const [bio, setBio] = useState<string>("");
-  const [prefs, setPrefs] = useState({ zipcode: "", ageMin: 21, ageMax: 45, distanceKm: 25 });
+  const [prefs, setPrefs] = useState({ zipcode: "", ageMin: 21, ageMax: 45, distanceMiles: 25 });
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const { session } = useAuthSession();
@@ -98,7 +98,7 @@ export function ProfileWizard() {
             match_frequency: 2,
             age_range_min: prefs.ageMin,
             age_range_max: prefs.ageMax,
-            distance_radius: prefs.distanceKm,
+            distance_radius: prefs.distanceMiles,
           })
           .select();
           
@@ -121,7 +121,7 @@ export function ProfileWizard() {
             match_frequency: 2,
             age_range_min: prefs.ageMin,
             age_range_max: prefs.ageMax,
-            distance_radius: prefs.distanceKm,
+            distance_radius: prefs.distanceMiles,
           })
           .eq("id", session.user.id)
           .select();
@@ -183,24 +183,24 @@ export function ProfileWizard() {
   return (
     <div className="space-y-6">
       <ol className="flex items-center gap-2 text-xs">
-        <li className={`px-2 py-1 rounded ${currentStep === 0 ? "bg-black text-white" : "bg-gray-100"}`}>Photos</li>
-        <li className={`px-2 py-1 rounded ${currentStep === 1 ? "bg-black text-white" : "bg-gray-100"}`}>Hobbies</li>
-        <li className={`px-2 py-1 rounded ${currentStep === 2 ? "bg-black text-white" : "bg-gray-100"}`}>About you</li>
-        <li className={`px-2 py-1 rounded ${currentStep === 3 ? "bg-black text-white" : "bg-gray-100"}`}>Preferences</li>
+        <li className={`px-2 py-1 rounded ${currentStep === 0 ? "bg-black text-white" : "bg-gray-200 text-gray-700"}`}>Photos</li>
+        <li className={`px-2 py-1 rounded ${currentStep === 1 ? "bg-black text-white" : "bg-gray-200 text-gray-700"}`}>Hobbies</li>
+        <li className={`px-2 py-1 rounded ${currentStep === 2 ? "bg-black text-white" : "bg-gray-200 text-gray-700"}`}>About you</li>
+        <li className={`px-2 py-1 rounded ${currentStep === 3 ? "bg-black text-white" : "bg-gray-200 text-gray-700"}`}>Preferences</li>
       </ol>
 
-      <div className="rounded-lg border p-4 min-h-48">
+      <div className="rounded-lg border border-gray-300 bg-gray-50 p-4 min-h-48">
         {currentStep === 0 && (
           <div className="space-y-3">
-            <p className="font-medium">Photos</p>
-            <p className="text-sm text-black/70 dark:text-white/70">Upload 2-3 photos. Max 2MB each.</p>
+            <p className="font-medium text-gray-900">Photos</p>
+            <p className="text-sm text-gray-600">Upload 2-3 photos. Max 2MB each.</p>
             <PhotoUpload photos={photos} onChange={setPhotos} maxPhotos={3} />
           </div>
         )}
         {currentStep === 1 && (
           <div className="space-y-3">
-            <p className="font-medium">Hobbies</p>
-            <p className="text-sm text-black/70 dark:text-white/70">Search and rank your top hobbies.</p>
+            <p className="font-medium text-gray-900">Hobbies</p>
+            <p className="text-sm text-gray-600">Search and rank your top hobbies.</p>
             <HobbySelector selected={hobbies} onChange={setHobbies} />
           </div>
         )}
@@ -218,7 +218,11 @@ export function ProfileWizard() {
 
       <div className="flex items-center justify-between">
         <button
-          className="px-3 py-2 text-sm rounded border disabled:opacity-50"
+          className="px-4 py-2 text-sm font-medium rounded border border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed shadow-sm"
+          style={{
+            backgroundColor: currentStep === 0 ? '#f3f4f6' : '#ffffff',
+            color: currentStep === 0 ? '#6b7280' : '#111827'
+          }}
           onClick={prev}
           disabled={currentStep === 0}
         >
@@ -226,7 +230,19 @@ export function ProfileWizard() {
         </button>
         {currentStep < 3 ? (
           <button
-            className="px-3 py-2 text-sm rounded bg-black text-white disabled:opacity-50"
+            className="px-4 py-2 text-sm font-medium rounded hover:bg-gray-800 disabled:cursor-not-allowed shadow-sm"
+            style={{
+              backgroundColor: (currentStep === 0 && photos.length < 2) ||
+                (currentStep === 1 && hobbies.length < 1) ||
+                (currentStep === 2 && (name.trim().length < 2 || bio.trim().length < 20))
+                ? '#d1d5db'
+                : '#000000',
+              color: (currentStep === 0 && photos.length < 2) ||
+                (currentStep === 1 && hobbies.length < 1) ||
+                (currentStep === 2 && (name.trim().length < 2 || bio.trim().length < 20))
+                ? '#1f2937'
+                : '#ffffff'
+            }}
             onClick={next}
             disabled={
               (currentStep === 0 && photos.length < 2) ||
@@ -246,7 +262,11 @@ export function ProfileWizard() {
           </button>
         ) : (
           <button
-            className="px-3 py-2 text-sm rounded bg-black text-white disabled:opacity-50"
+            className="px-4 py-2 text-sm font-medium rounded hover:bg-gray-800 disabled:cursor-not-allowed shadow-sm"
+            style={{
+              backgroundColor: isSaving || !prefs.zipcode.trim() ? '#d1d5db' : '#000000',
+              color: isSaving || !prefs.zipcode.trim() ? '#1f2937' : '#ffffff'
+            }}
             onClick={completeProfile}
             disabled={isSaving || !prefs.zipcode.trim()}
           >
