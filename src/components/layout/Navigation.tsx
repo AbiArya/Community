@@ -11,7 +11,8 @@ export function Navigation() {
   const { session, isLoading } = useAuthSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
-  const firstLinkRef = useRef<HTMLAnchorElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const previouslyFocusedElement = useRef<HTMLElement | null>(null);
 
   const pathname = usePathname();
   const [hash, setHash] = useState<string>("");
@@ -42,21 +43,57 @@ export function Navigation() {
 
   useEffect(() => {
     if (menuOpen) {
-      firstLinkRef.current?.focus();
-    } else {
-      menuButtonRef.current?.focus();
+      previouslyFocusedElement.current = document.activeElement as HTMLElement;
+      const firstFocusable = menuRef.current?.querySelector<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([-1])',
+      );
+      firstFocusable?.focus();
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
     }
+
+    (previouslyFocusedElement.current ?? menuButtonRef.current)?.focus();
+    previouslyFocusedElement.current = null;
+    return;
   }, [menuOpen]);
 
   useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (!menuOpen) return;
-      if (e.key === "Escape") {
+    if (!menuOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
         setMenuOpen(false);
+        return;
       }
-    }
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+
+      if (event.key !== "Tab" || !menuRef.current) {
+        return;
+      }
+
+      const focusable = menuRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([-1])',
+      );
+      if (!focusable.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const isShiftTab = event.shiftKey;
+      const activeElement = document.activeElement as HTMLElement | null;
+
+      if (!isShiftTab && activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      } else if (isShiftTab && activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [menuOpen]);
 
   const authLinks = isLoading ? null : session ? (
@@ -116,6 +153,7 @@ export function Navigation() {
           className="inline-flex items-center rounded-full border border-white/70 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-ink-600 shadow-[0_10px_30px_rgba(17,20,35,0.08)] transition hover:text-brand-600 sm:hidden"
           aria-expanded={menuOpen}
           aria-controls="mobile-menu"
+          aria-haspopup="dialog"
           onClick={() => setMenuOpen((v) => !v)}
         >
           Menu
@@ -124,51 +162,75 @@ export function Navigation() {
       {menuOpen && (
         <div
           id="mobile-menu"
-          className="sm:hidden border-t border-white/50 bg-white/90 px-4 pb-6 pt-2 shadow-[0_25px_55px_rgba(17,20,35,0.12)]"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile navigation menu"
+          className="fixed inset-0 z-50 sm:hidden"
         >
-          <div className="flex flex-col gap-3 text-sm">
-            <Link ref={firstLinkRef} href="/" className={linkClass("/")} onClick={() => setMenuOpen(false)}>
-              Home
-            </Link>
-            <Link href="/#features" className={linkClass("/#features")} onClick={() => setMenuOpen(false)}>
-              Features
-            </Link>
-            <Link href="/#faq" className={linkClass("/#faq")} onClick={() => setMenuOpen(false)}>
-              FAQ
-            </Link>
-            {isLoading ? null : session ? (
-              <>
-                <Link href="/profile" className={linkClass("/profile")} onClick={() => setMenuOpen(false)}>
-                  Profile
-                </Link>
-                <Link href="/settings" className={linkClass("/settings")} onClick={() => setMenuOpen(false)}>
-                  Settings
-                </Link>
-                <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    handleLogout();
-                  }}
-                  className="text-left text-sm font-medium text-ink-500 transition hover:text-brand-600"
-                  aria-label="Log out"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href="/login" className={linkClass("/login")} onClick={() => setMenuOpen(false)}>
-                  Login
-                </Link>
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center justify-center rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_25px_45px_-20px_rgba(124,58,237,0.65)] transition hover:-translate-y-0.5 hover:bg-brand-500"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Get started
-                </Link>
-              </>
-            )}
+          <div
+            aria-hidden="true"
+            role="presentation"
+            className="absolute inset-0 bg-ink-900/30 backdrop-blur-sm transition-opacity"
+            onClick={() => setMenuOpen(false)}
+          />
+          <div
+            ref={menuRef}
+            className="relative ml-auto flex h-full w-full max-w-xs flex-col gap-4 border-l border-white/70 bg-white px-4 pb-8 pt-6 shadow-[0_25px_55px_rgba(17,20,35,0.2)]"
+          >
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ink-500">Menu</p>
+              <button
+                type="button"
+                onClick={() => setMenuOpen(false)}
+                className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-ink-500 transition hover:text-brand-600"
+              >
+                Close
+              </button>
+            </div>
+            <div className="flex flex-col gap-3 text-sm">
+              <Link href="/" className={linkClass("/")} onClick={() => setMenuOpen(false)}>
+                Home
+              </Link>
+              <Link href="/#features" className={linkClass("/#features")} onClick={() => setMenuOpen(false)}>
+                Features
+              </Link>
+              <Link href="/#faq" className={linkClass("/#faq")} onClick={() => setMenuOpen(false)}>
+                FAQ
+              </Link>
+              {isLoading ? null : session ? (
+                <>
+                  <Link href="/profile" className={linkClass("/profile")} onClick={() => setMenuOpen(false)}>
+                    Profile
+                  </Link>
+                  <Link href="/settings" className={linkClass("/settings")} onClick={() => setMenuOpen(false)}>
+                    Settings
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="text-left text-sm font-medium text-ink-500 transition hover:text-brand-600"
+                    aria-label="Log out"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" className={linkClass("/login")} onClick={() => setMenuOpen(false)}>
+                    Login
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="inline-flex items-center justify-center rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_25px_45px_-20px_rgba(124,58,237,0.65)] transition hover:-translate-y-0.5 hover:bg-brand-500"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Get started
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

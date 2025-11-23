@@ -10,6 +10,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
+  /* Brand Colors (Primary - Purple) */
   --color-brand-50: #f3e6ff;
   --color-brand-100: #e5cbff;
   --color-brand-200: #d1a2ff;
@@ -21,6 +22,7 @@
   --color-brand-800: #4f1199;
   --color-brand-900: #360c66;
 
+  /* Peach Colors (Secondary - Warm) */
   --color-peach-50: #fff0e6;
   --color-peach-100: #ffd7bf;
   --color-peach-200: #ffb38a;
@@ -28,12 +30,14 @@
   --color-peach-400: #ff712b;
   --color-peach-500: #f85a0a;
 
+  /* Sand Colors (Neutral Warm) */
   --color-sand-50: #fff7eb;
   --color-sand-100: #fde8cf;
   --color-sand-200: #f4d2aa;
   --color-sand-300: #dcb37f;
   --color-sand-400: #b88a57;
 
+  /* Ink Colors (Neutral Cool - Text & UI) */
   --color-ink-50: #f6f7fb;
   --color-ink-100: #e6e8f2;
   --color-ink-200: #ccd0e2;
@@ -45,14 +49,38 @@
   --color-ink-800: #1f2232;
   --color-ink-900: #111423;
 
+  /* Semantic Colors - Success */
+  --color-success-50: #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+
+  /* Semantic Colors - Error */
+  --color-error-50: #fef2f2;
+  --color-error-100: #fee2e2;
+  --color-error-500: #ef4444;
+  --color-error-600: #dc2626;
+  --color-error-700: #b91c1c;
+
+  /* Semantic Colors - Warning */
+  --color-warning-50: #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-warning-700: #b45309;
+
+  /* Typography */
   --font-sans: var(--font-geist-sans), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-heading: var(--font-geist-sans), "Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: var(--font-geist-mono), "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
 
+  /* Spacing Extensions */
   --spacing-13: 3.25rem;
   --spacing-15: 3.75rem;
   --spacing-18: 4.5rem;
 
+  /* Border Radius */
   --radius-lg: 1.1rem;
   --radius-xl: 1.55rem;
   --radius-2xl: 2.25rem;
@@ -113,6 +141,7 @@ select {
 }
 
 @layer utilities {
+  /* Glass Effects */
   .glass-panel {
     background: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.6);
@@ -121,6 +150,19 @@ select {
     backdrop-filter: blur(28px);
   }
 
+  .glass-light {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(20px);
+  }
+
+  .glass-subtle {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(16px);
+  }
+
+  /* Badge & Labels */
   .eyebrow-pill {
     display: inline-flex;
     align-items: center;
@@ -131,5 +173,142 @@ select {
     font-weight: 600;
     letter-spacing: 0.2em;
     text-transform: uppercase;
+  }
+
+  /* Button Styles */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-brand-600);
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+    box-shadow: 0 25px 60px -25px rgba(124, 58, 237, 0.75);
+    transition: transform 200ms, background-color 200ms;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--color-brand-500);
+    transform: translateY(-2px);
+  }
+
+  .btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--color-brand-200);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-ink-200);
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-ink-700);
+    transition: transform 200ms, color 200ms;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    color: var(--color-brand-600);
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--color-brand-200);
+  }
+
+  .btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Card Variants */
+  .card-elevated {
+    border-radius: var(--radius-2xl);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background: white;
+    box-shadow: 0 10px 15px -3px rgba(17, 20, 35, 0.1),
+                0 4px 6px -2px rgba(17, 20, 35, 0.05);
+  }
+
+  .card-feature {
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background: rgba(255, 247, 235, 0.7);
+    box-shadow: 0 30px 70px -55px rgba(17, 20, 35, 0.65);
+  }
+
+  .card-stat {
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 15px 35px rgba(17, 20, 35, 0.08);
+  }
+
+  /* Input Styles */
+  .input-base {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-ink-200);
+    border-radius: 0.5rem;
+    background-color: white;
+    color: var(--color-ink-900);
+    transition: border-color 150ms, box-shadow 150ms;
+  }
+
+  .input-base::placeholder {
+    color: var(--color-ink-300);
+  }
+
+  .input-base:focus {
+    outline: none;
+    border-color: transparent;
+    box-shadow: 0 0 0 2px var(--color-brand-500);
+  }
+
+  .input-base:disabled {
+    background-color: var(--color-ink-50);
+    color: var(--color-ink-400);
+    cursor: not-allowed;
+  }
+
+  /* Status Messages */
+  .alert-success {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-success-100);
+    background-color: var(--color-success-50);
+    color: var(--color-success-700);
+    font-size: 0.875rem;
+  }
+
+  .alert-error {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-error-100);
+    background-color: var(--color-error-50);
+    color: var(--color-error-700);
+    font-size: 0.875rem;
+  }
+
+  .alert-warning {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-warning-100);
+    background-color: var(--color-warning-50);
+    color: var(--color-warning-700);
+    font-size: 0.875rem;
   }
 }

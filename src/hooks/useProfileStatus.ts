@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useAuthSession } from "@/hooks/useAuthSession";
 
@@ -14,8 +14,9 @@ export function useProfileStatus(): ProfileStatusState & { refresh: () => void }
   const { session, isLoading: isSessionLoading } = useAuthSession();
   const [state, setState] = useState<ProfileStatusState>({ isLoading: true, isComplete: null, error: null });
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const lastFetchSignatureRef = useRef<string | null>(null);
 
-  const fetchProfileStatus = async () => {
+  const fetchProfileStatus = useCallback(async () => {
     if (isSessionLoading) return;
     if (!session) {
       setState({ isLoading: false, isComplete: null, error: null });
@@ -37,7 +38,9 @@ export function useProfileStatus(): ProfileStatusState & { refresh: () => void }
     } catch (e) {
       setState({ isLoading: false, isComplete: false, error: e instanceof Error ? e.message : String(e) });
     }
-  };
+  }, [isSessionLoading, session]);
+
+  const sessionId = session?.user.id ?? "no-session";
 
   useEffect(() => {
     let isMounted = true;
@@ -45,11 +48,16 @@ export function useProfileStatus(): ProfileStatusState & { refresh: () => void }
       if (!isMounted) return;
       await fetchProfileStatus();
     }
+    const signature = `${sessionId}-${refreshTrigger}-${isSessionLoading ? "loading" : "ready"}`;
+    if (lastFetchSignatureRef.current === signature) {
+      return;
+    }
+    lastFetchSignatureRef.current = signature;
     run();
     return () => {
       isMounted = false;
     };
-  }, [isSessionLoading, session, refreshTrigger]);
+  }, [fetchProfileStatus, isSessionLoading, refreshTrigger, sessionId]);
 
   const refresh = useCallback(() => {
     setRefreshTrigger(prev => prev + 1);

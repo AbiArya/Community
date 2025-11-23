@@ -17,9 +17,9 @@ export function ProfileView() {
     return (
       <div className="space-y-6">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+          <div className="mb-4 h-8 w-1/3 rounded bg-ink-200"></div>
+          <div className="mb-2 h-4 w-1/2 rounded bg-ink-200"></div>
+          <div className="h-4 w-2/3 rounded bg-ink-200"></div>
         </div>
       </div>
     );
@@ -28,11 +28,11 @@ export function ProfileView() {
   if (error) {
     return (
       <div className="space-y-4">
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800">Error loading profile: {error}</p>
+        <div className="alert-error">
+          <p className="font-medium">Error loading profile: {error}</p>
           <button 
             onClick={refresh}
-            className="mt-2 px-3 py-1 text-sm bg-red-100 text-red-800 rounded hover:bg-red-200"
+            className="mt-2 rounded bg-error-100 px-3 py-1 text-sm text-error-800 hover:bg-error-200"
           >
             Try Again
           </button>
@@ -44,7 +44,7 @@ export function ProfileView() {
   if (!profile) {
     return (
       <div className="space-y-4">
-        <p className="text-gray-600">No profile data found.</p>
+        <p className="text-ink-600">No profile data found.</p>
       </div>
     );
   }
@@ -54,10 +54,10 @@ export function ProfileView() {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold">Edit Profile</h1>
+          <h1 className="text-2xl font-semibold text-ink-900">Edit Profile</h1>
           <button
             onClick={() => setIsEditing(false)}
-            className="px-4 py-2 text-sm bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200"
+            className="btn-secondary"
           >
             Cancel
           </button>
@@ -78,10 +78,10 @@ export function ProfileView() {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold">Profile Preview</h1>
+          <h1 className="text-2xl font-semibold text-ink-900">Profile Preview</h1>
           <button
             onClick={() => setIsPreviewing(false)}
-            className="px-4 py-2 text-sm bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200"
+            className="btn-secondary"
           >
             Back to Profile
           </button>
@@ -96,19 +96,19 @@ export function ProfileView() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">{profile.full_name}</h1>
-          <p className="text-gray-600">{profile.email}</p>
+          <h1 className="font-heading text-2xl text-ink-900">{profile.full_name}</h1>
+          <p className="text-ink-600">{profile.email}</p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => setIsPreviewing(true)}
-            className="px-4 py-2 text-sm bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200"
+            className="btn-secondary"
           >
             Preview
           </button>
           <button
             onClick={() => setIsEditing(true)}
-            className="px-4 py-2 text-sm font-semibold !text-white rounded-lg bg-gradient-to-r from-[#8b30ff] to-[#ff712b] shadow-md hover:from-[#7a21ef] hover:to-[#f85a0a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8b30ff]"
+            className="rounded-lg bg-gradient-to-r from-brand-500 to-peach-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:from-brand-600 hover:to-peach-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
           >
             Edit Profile
           </button>
@@ -117,18 +117,18 @@ export function ProfileView() {
 
       {/* Photos Section */}
       <div className="space-y-3">
-        <h2 className="text-lg font-medium">Photos</h2>
+        <h2 className="text-lg font-medium text-ink-900">Photos</h2>
         {profile.photos.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {profile.photos.map((photo) => (
               <div key={photo.id} className="relative">
                 <img
                   src={photo.photo_url}
                   alt={`Profile photo ${photo.display_order}`}
-                  className="w-full h-48 object-cover rounded-lg"
+                  className="h-48 w-full rounded-2xl object-cover shadow-md"
                 />
                 {photo.is_primary && (
-                  <span className="absolute top-2 left-2 px-2 py-1 text-xs bg-black text-white rounded">
+                  <span className="absolute left-2 top-2 rounded-full bg-brand-600 px-2 py-1 text-xs text-white shadow-md">
                     Primary
                   </span>
                 )}
@@ -136,83 +136,83 @@ export function ProfileView() {
             ))}
           </div>
         ) : (
-          <div className="p-8 border-2 border-dashed border-gray-300 rounded-lg text-center">
-            <p className="text-gray-500">No photos uploaded yet</p>
+          <div className="rounded-2xl border-2 border-dashed border-ink-200 p-8 text-center">
+            <p className="text-ink-500">No photos uploaded yet</p>
           </div>
         )}
       </div>
 
       {/* Bio Section */}
       <div className="space-y-3">
-        <h2 className="text-lg font-medium">About Me</h2>
+        <h2 className="text-lg font-medium text-ink-900">About Me</h2>
         {profile.bio ? (
-          <p className="text-gray-700 whitespace-pre-wrap">{profile.bio}</p>
+          <p className="whitespace-pre-wrap text-ink-700">{profile.bio}</p>
         ) : (
-          <p className="text-gray-500 italic">No bio written yet</p>
+          <p className="italic text-ink-500">No bio written yet</p>
         )}
       </div>
 
       {/* Hobbies Section */}
       <div className="space-y-3">
-        <h2 className="text-lg font-medium">Hobbies & Interests</h2>
+        <h2 className="text-lg font-medium text-ink-900">Hobbies & Interests</h2>
         {profile.hobbies.length > 0 ? (
           <div className="space-y-2">
             {profile.hobbies.map((userHobby, index) => (
               <div key={userHobby.id} className="flex items-center gap-3">
-                <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-100 text-sm font-medium text-brand-700">
                   {index + 1}
                 </span>
-                <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                <span className="rounded-full bg-sand-100 px-3 py-1 text-sm text-ink-900">
                   {userHobby.hobby.name}
                 </span>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-ink-500">
                   {userHobby.hobby.category}
                 </span>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-500 italic">No hobbies selected yet</p>
+          <p className="italic text-ink-500">No hobbies selected yet</p>
         )}
       </div>
 
       {/* Preferences Section */}
       <div className="space-y-3">
-        <h2 className="text-lg font-medium">Matching Preferences</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-medium text-sm text-gray-600">Age Range</h3>
-            <p className="text-lg">{profile.age_range_min} - {profile.age_range_max}</p>
+        <h2 className="text-lg font-medium text-ink-900">Matching Preferences</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="card-stat p-4">
+            <h3 className="text-sm font-medium text-ink-600">Age Range</h3>
+            <p className="text-lg text-ink-900">{profile.age_range_min} - {profile.age_range_max}</p>
           </div>
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-medium text-sm text-gray-600">Distance</h3>
-            <p className="text-lg">{profile.distance_radius} miles</p>
+          <div className="card-stat p-4">
+            <h3 className="text-sm font-medium text-ink-600">Distance</h3>
+            <p className="text-lg text-ink-900">{profile.distance_radius} miles</p>
           </div>
         </div>
       </div>
 
       {/* Profile Info */}
       <div className="space-y-3">
-        <h2 className="text-lg font-medium">Profile Information</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <h2 className="text-lg font-medium text-ink-900">Profile Information</h2>
+        <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
           <div>
-            <span className="font-medium text-gray-600">Member since:</span>
-            <p>{new Date(profile.created_at).toLocaleDateString()}</p>
+            <span className="font-medium text-ink-600">Member since:</span>
+            <p className="text-ink-900">{new Date(profile.created_at).toLocaleDateString()}</p>
           </div>
           <div>
-            <span className="font-medium text-gray-600">Last updated:</span>
-            <p>{new Date(profile.updated_at).toLocaleDateString()}</p>
+            <span className="font-medium text-ink-600">Last updated:</span>
+            <p className="text-ink-900">{new Date(profile.updated_at).toLocaleDateString()}</p>
           </div>
           {profile.location && (
             <div>
-              <span className="font-medium text-gray-600">Location:</span>
-              <p>{profile.location}</p>
+              <span className="font-medium text-ink-600">Location:</span>
+              <p className="text-ink-900">{profile.location}</p>
             </div>
           )}
           {profile.age && (
             <div>
-              <span className="font-medium text-gray-600">Age:</span>
-              <p>{profile.age}</p>
+              <span className="font-medium text-ink-600">Age:</span>
+              <p className="text-ink-900">{profile.age}</p>
             </div>
           )}
         </div>

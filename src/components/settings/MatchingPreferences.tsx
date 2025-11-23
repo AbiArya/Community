@@ -95,12 +95,12 @@ export function MatchingPreferences() {
     <div className="space-y-6">
       {/* Age Range */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-ink-700 mb-2">
           Age Range Preference
         </label>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs text-gray-600 mb-1">Minimum Age</label>
+            <label className="block text-xs text-ink-600 mb-1">Minimum Age</label>
             <input
               type="number"
               min="18"
@@ -111,11 +111,11 @@ export function MatchingPreferences() {
                 if (!isEditing) setIsEditing(true);
               }}
               disabled={isLoading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
+              className="input-base"
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-600 mb-1">Maximum Age</label>
+            <label className="block text-xs text-ink-600 mb-1">Maximum Age</label>
             <input
               type="number"
               min={ageRangeMin + 1}
@@ -126,18 +126,18 @@ export function MatchingPreferences() {
                 if (!isEditing) setIsEditing(true);
               }}
               disabled={isLoading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
+              className="input-base"
             />
           </div>
         </div>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-ink-500">
           Matches will be within ages {ageRangeMin} to {ageRangeMax}
         </p>
       </div>
 
       {/* Distance Radius */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-ink-700 mb-2">
           Distance Radius (miles)
         </label>
         <div className="space-y-2">
@@ -152,27 +152,27 @@ export function MatchingPreferences() {
               if (!isEditing) setIsEditing(true);
             }}
             disabled={isLoading}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+            className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-ink-100 accent-brand-600"
           />
-          <div className="flex justify-between text-xs text-gray-500">
+          <div className="flex justify-between text-xs text-ink-500">
             <span>5 miles</span>
-            <span className="font-semibold text-blue-600">{distanceRadius} miles</span>
+            <span className="font-semibold text-brand-600">{distanceRadius} miles</span>
             <span>100 miles</span>
           </div>
         </div>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-ink-500">
           Find friends within {distanceRadius} miles of your location
         </p>
       </div>
 
       {/* Match Frequency - Display Only */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-ink-700 mb-2">
           Matches per Week
         </label>
-        <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-          <p className="text-2xl font-semibold text-gray-900">2 matches</p>
-          <p className="text-sm text-gray-600 mt-1">
+        <div className="rounded-2xl border border-brand-100 bg-brand-50/60 p-4">
+          <p className="text-2xl font-semibold text-ink-900">2 matches</p>
+          <p className="mt-1 text-sm text-ink-600">
             We'll send you 2 carefully selected matches every week.
           </p>
         </div>
@@ -184,14 +184,14 @@ export function MatchingPreferences() {
           <button
             onClick={handleSavePreferences}
             disabled={isLoading}
-            className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md bg-brand-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-brand-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? "Saving..." : "Save Preferences"}
           </button>
           <button
             onClick={handleCancel}
             disabled={isLoading}
-            className="px-6 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md border border-ink-200 px-6 py-2 text-sm font-medium text-ink-700 transition hover:bg-ink-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Cancel
           </button>
@@ -200,13 +200,7 @@ export function MatchingPreferences() {
 
       {/* Message Display */}
       {message && (
-        <div
-          className={`p-3 rounded-md text-sm ${
-            message.type === "success"
-              ? "bg-green-50 text-green-800 border border-green-200"
-              : "bg-red-50 text-red-800 border border-red-200"
-          }`}
-        >
+        <div className={message.type === "success" ? "alert-success" : "alert-error"}>
           {message.text}
         </div>
       )}

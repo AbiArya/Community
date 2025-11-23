@@ -65,38 +65,46 @@ export function EmailAuthForm({ mode }: EmailAuthFormProps) {
   // OTP entry removed; magic link only
 
   return (
-    <div className="space-y-4">
-      <form onSubmit={handleSend} className="space-y-3">
-        <label className="block text-sm">Email</label>
-        <input
-          className="w-full border rounded px-3 py-2"
-          placeholder="you@example.com"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="email"
-        />
+    <div className="space-y-5">
+      <form onSubmit={handleSend} className="space-y-4">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-ink-700">Email address</label>
+          <input
+            className="input-base"
+            placeholder="you@example.com"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            required
+          />
+        </div>
         <button
           disabled={isSubmitting}
-          className="w-full bg-black text-white rounded px-3 py-2 disabled:opacity-50"
+          className="btn-primary w-full"
           type="submit"
         >
-          {isSubmitting ? "Sending..." : mode === "signup" ? "Send link to sign up" : "Send link to sign in"}
+          {isSubmitting ? "Sending magic link..." : mode === "signup" ? "Create account" : "Sign in"}
         </button>
       </form>
 
-      {/* OTP entry removed (magic link only) */}
-
       {message && (
-        <p className="text-sm text-black/80 dark:text-white/80" role="status">
-          {message}
-        </p>
+        <div className="alert-success" role="status">
+          <p className="text-sm font-medium">{message}</p>
+        </div>
       )}
       {error && (
-        <p className="text-sm text-red-600" role="alert">
-          {error}
-        </p>
+        <div className="alert-error" role="alert">
+          <p className="text-sm font-medium">{error}</p>
+        </div>
       )}
+
+      <div className="rounded-2xl border border-brand-100 bg-brand-50/60 p-4">
+        <p className="text-xs text-ink-600">
+          ✨ We&apos;ll send you a secure magic link—no password needed. Check your inbox and click the link to{" "}
+          {mode === "signup" ? "complete signup" : "sign in"}.
+        </p>
+      </div>
     </div>
   );
 }

@@ -141,15 +141,11 @@ export function ProfileWizard() {
           ...photo,
         }));
         
-        console.log('Inserting photos:', photosToInsert);
-        console.log('Session user ID:', session.user.id);
-        
         const { error: photosError } = await supabase
           .from("user_photos")
           .insert(photosToInsert);
           
         if (photosError) {
-          console.error('Photos insert error:', photosError);
           throw new Error(`Failed to save photos: ${photosError.message}`);
         }
       }

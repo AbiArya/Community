@@ -153,15 +153,6 @@ export function ProfilePreview() {
               </div>
             </div>
           )}
-
-          {/* Matching Preferences (for context) */}
-          <div className="pt-4 border-t border-gray-100">
-            <h4 className="font-medium text-sm text-gray-700 mb-2">Looking for</h4>
-            <div className="text-xs text-gray-600 space-y-1">
-              <p>Age: {profile.age_range_min} - {profile.age_range_max}</p>
-              <p>Within {profile.distance_radius} miles</p>
-            </div>
-          </div>
         </div>
       </div>
 

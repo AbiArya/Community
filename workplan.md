@@ -103,24 +103,18 @@ A friend-matching web application that connects users based on shared hobbies an
 
 #### Milestone 5.1: Settings Page
 - [x] Create account settings interface
-- [x] Add phone number change functionality
 - [x] Add age range and distance preferences
 - [x] Create account deletion option
 - Note: Match frequency is fixed at 2 per week (not user-configurable)
+- Note: Phone numbers not collected (in-app messaging planned for future)
 
-#### Milestone 5.2: Data Management
-- [ ] Implement profile data backup
-- [ ] Add data export functionality
-- [ ] Create profile completion tracking
-- [ ] Add user onboarding checklist
-
-#### Milestone 5.3: UI Refresh & Theming ⏳
-- [ ] Run full UI audit to catalog visual inconsistencies and usability gaps
-- [ ] Define updated color palette, typography scale, and spacing tokens
-- [ ] Create reusable Tailwind theme tokens and component variants that match the refreshed look
-- [ ] Update existing pages (landing, profile, settings, matches) to the unified theme
-- [ ] Add lightweight style guide that documents patterns/components for future features
-- [ ] Validate refreshed UI on mobile + desktop to ensure parity
+#### Milestone 5.2: UI Refresh & Theming ✅
+- [x] Run full UI audit to catalog visual inconsistencies and usability gaps
+- [x] Define updated color palette, typography scale, and spacing tokens
+- [x] Create reusable Tailwind theme tokens and component variants that match the refreshed look
+- [x] Update existing pages (landing, profile, settings, matches) to the unified theme
+- [x] Add lightweight style guide that documents patterns/components for future features
+- [x] Validate refreshed UI on mobile + desktop to ensure parity
 
 ### Phase 6: Matching Algorithm & System ⏳
 **Timeline**: Week 5-6
@@ -173,6 +167,13 @@ A friend-matching web application that connects users based on shared hobbies an
 - [ ] Create privacy policy and terms of service
 - [ ] Final security audit
 - [ ] Soft launch with beta users
+
+### Phase 9: Future Enhancements ⏳
+**Timeline**: Post-Launch
+
+#### Milestone 9.1: Data Management & Onboarding
+- [ ] Create profile completion tracking
+- [ ] Add user onboarding checklist
 
 ## Technical Requirements
 
@@ -299,7 +300,8 @@ src/
 - **Messaging**: Basic chat initiation for accepted matches
 - **Settings**: Granular control over matching preferences
 
-## Current Status: Phase 5.3 - UI Refresh & Theming (In Progress)
+## Current Status: Phase 5 Complete ✅ - Ready for Phase 6
+
 **Completed in Phase 4 & 5**:
 - [x] Photos persisted to Supabase Storage and `user_photos` table
 - [x] Predefined hobbies seeded; selections persist to `user_hobbies`
@@ -309,8 +311,18 @@ src/
 - [x] Account settings with phone number management
 - [x] Matching preferences (age range, distance)
 - [x] Account deletion functionality
+- [x] **UI Refresh & Theming complete** - unified design system across all pages
+- [x] **Design tokens documented** (colors, typography, spacing, shadows)
+- [x] **Reusable Tailwind utilities created** (buttons, cards, forms, alerts)
+- [x] **Style guide created** with practical component patterns
 
-**Next Phase: Phase 6 - Matching Algorithm & System (starts after UI refresh solidifies the new visual direction)**
+**Documentation Created**:
+- `UI-AUDIT.md` - Initial audit findings
+- `DESIGN-TOKENS.md` - Complete design token reference
+- `STYLE-GUIDE.md` - Practical component patterns and examples
+- `UI-REFRESH-SUMMARY.md` - Summary of UI refresh completion
+
+**Next Phase: Phase 6 - Matching Algorithm & System**
 
 ## Risk Assessment
 - **High Risk**: Matching algorithm accuracy and user satisfaction

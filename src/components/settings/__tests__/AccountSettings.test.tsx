@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { AccountSettings } from "@/components/settings/AccountSettings";
 
 // Mock the hooks and dependencies
@@ -6,15 +6,17 @@ jest.mock("@/hooks/useProfileData", () => ({
   useProfileData: jest.fn(),
 }));
 
-jest.mock("@/lib/supabase/client", () => ({
-  getSupabaseBrowserClient: jest.fn(),
+jest.mock("@/lib/utils/zipcode", () => ({
+  zipcodeToLocation: jest.fn((zipcode: string) => {
+    if (zipcode === "94102") return "San Francisco, CA";
+    if (zipcode === "10001") return "New York, NY";
+    return null;
+  }),
 }));
 
 import { useProfileData } from "@/hooks/useProfileData";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const mockUseProfileData = useProfileData as jest.MockedFunction<typeof useProfileData>;
-const mockGetSupabaseClient = getSupabaseBrowserClient as jest.MockedFunction<typeof getSupabaseBrowserClient>;
 
 describe("AccountSettings", () => {
   const baseProfile = {
@@ -22,13 +24,15 @@ describe("AccountSettings", () => {
     full_name: "John Doe",
     email: "john@example.com",
     bio: "Test bio",
-    location: "San Francisco",
+    location: null,
+    zipcode: "94102",
+    latitude: 37.7749,
+    longitude: -122.4194,
     age: 28,
     age_range_min: 25,
     age_range_max: 35,
     distance_radius: 50,
     match_frequency: 2,
-    phone_number: null,
     is_profile_complete: true,
     created_at: "2024-01-01T00:00:00Z",
     updated_at: "2024-01-01T00:00:00Z",
@@ -46,15 +50,6 @@ describe("AccountSettings", () => {
       refresh,
     });
     return { profile, refresh };
-  };
-
-  const setupSupabaseClient = (eqResult = { error: null }) => {
-    const eq = jest.fn().mockResolvedValue(eqResult);
-    const update = jest.fn(() => ({ eq }));
-    const from = jest.fn(() => ({ update }));
-    const client = { from };
-    mockGetSupabaseClient.mockReturnValue(client as any);
-    return { from, update, eq };
   };
 
   beforeEach(() => {
@@ -80,111 +75,8 @@ describe("AccountSettings", () => {
 
     expect(screen.getByDisplayValue("john@example.com")).toBeInTheDocument();
     expect(screen.getByDisplayValue("John Doe")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("San Francisco")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("San Francisco, CA")).toBeInTheDocument();
     expect(screen.getByText("Cannot be changed")).toBeInTheDocument();
-  });
-
-  test("shows add phone button when no phone number saved", () => {
-    setupProfileData();
-
-    render(<AccountSettings />);
-
-    expect(screen.getByText("Add Phone")).toBeInTheDocument();
-    expect(screen.getByText("Not set")).toBeInTheDocument();
-  });
-
-  test("shows update phone button when phone number exists", () => {
-    setupProfileData({ phone_number: "+15555550123" });
-
-    render(<AccountSettings />);
-
-    expect(screen.getByText("+15555550123")).toBeInTheDocument();
-    expect(screen.getByText("Update Phone")).toBeInTheDocument();
-  });
-
-  test("enters edit mode and disables save until value changes", () => {
-    setupProfileData();
-
-    render(<AccountSettings />);
-
-    fireEvent.click(screen.getByText("Add Phone"));
-
-    const saveButton = screen.getByRole("button", { name: "Save" });
-    expect(saveButton).toBeDisabled();
-
-    const phoneInput = screen.getByPlaceholderText("+15551234567");
-    fireEvent.change(phoneInput, { target: { value: "+15555550123" } });
-    expect(saveButton).not.toBeDisabled();
-  });
-
-  test("saves a valid phone number", async () => {
-    const { refresh } = setupProfileData();
-    const { from, update, eq } = setupSupabaseClient();
-
-    render(<AccountSettings />);
-
-    fireEvent.click(screen.getByText("Add Phone"));
-    fireEvent.change(screen.getByPlaceholderText("+15551234567"), {
-      target: { value: "+15555550123" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
-
-    await waitFor(() => {
-      expect(screen.getByText("Phone number updated successfully.")).toBeInTheDocument();
-    });
-
-    expect(from).toHaveBeenCalledWith("users");
-    expect(update).toHaveBeenCalledWith({ phone_number: "+15555550123" });
-    expect(eq).toHaveBeenCalledWith("id", "user-1");
-    expect(refresh).toHaveBeenCalled();
-  });
-
-  test("removes phone number when cleared", async () => {
-    const { refresh } = setupProfileData({ phone_number: "+18885551212" });
-    const { update } = setupSupabaseClient();
-
-    render(<AccountSettings />);
-
-    fireEvent.click(screen.getByText("Update Phone"));
-    const input = screen.getByPlaceholderText("+15551234567");
-    fireEvent.change(input, { target: { value: "" } });
-    fireEvent.click(screen.getByRole("button", { name: "Remove Phone" }));
-
-    await waitFor(() => {
-      expect(screen.getByText("Phone number removed from your account.")).toBeInTheDocument();
-    });
-
-    expect(update).toHaveBeenCalledWith({ phone_number: null });
-    expect(refresh).toHaveBeenCalled();
-  });
-
-  test("validates phone number format", async () => {
-    setupProfileData();
-    setupSupabaseClient();
-
-    render(<AccountSettings />);
-
-    fireEvent.click(screen.getByText("Add Phone"));
-    fireEvent.change(screen.getByPlaceholderText("+15551234567"), {
-      target: { value: "5551234567" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
-
-    await waitFor(() => {
-      expect(screen.getByText("Include your country code. Example: +15551234567")).toBeInTheDocument();
-    });
-  });
-
-  test("cancel button exits edit mode", () => {
-    setupProfileData();
-
-    render(<AccountSettings />);
-
-    fireEvent.click(screen.getByText("Add Phone"));
-    fireEvent.click(screen.getByText("Cancel"));
-
-    expect(screen.queryByPlaceholderText("+15551234567")).not.toBeInTheDocument();
-    expect(screen.getByText("Add Phone")).toBeInTheDocument();
   });
 
   test("displays helper text for non-editable fields", () => {
@@ -194,6 +86,22 @@ describe("AccountSettings", () => {
 
     expect(screen.getByText("To change your name, please edit your profile")).toBeInTheDocument();
     expect(screen.getByText("To change your location, please edit your profile")).toBeInTheDocument();
-    expect(screen.getByText("Use international format with your country code. Example: +15551234567")).toBeInTheDocument();
+  });
+
+  test("shows 'Not set' when zipcode is null", () => {
+    setupProfileData({ zipcode: null, latitude: null, longitude: null });
+
+    render(<AccountSettings />);
+
+    expect(screen.getByDisplayValue("Not set")).toBeInTheDocument();
+  });
+
+  test("shows raw zipcode as fallback when conversion fails", () => {
+    // Use a zipcode that our mock doesn't recognize
+    setupProfileData({ zipcode: "99999" });
+
+    render(<AccountSettings />);
+
+    expect(screen.getByDisplayValue("99999")).toBeInTheDocument();
   });
 });

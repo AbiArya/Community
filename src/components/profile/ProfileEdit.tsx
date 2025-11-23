@@ -1,10 +1,10 @@
 "use client";
 
-import { useProfileData, type UserHobby } from "@/hooks/useProfileData";
+import { useProfileData, type UserHobby, type UserPhoto } from "@/hooks/useProfileData";
 import { useState, useEffect } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useAuthSession } from "@/hooks/useAuthSession";
-import { PhotoManagement } from "./PhotoManagement";
+import { PhotoManagement, type PendingPhoto, type PhotoOperation } from "./PhotoManagement";
 import { HobbyManagement } from "./HobbyManagement";
 import { validateAndNormalizeZipcode, zipcodeToLocation, isValidZipcode } from "@/lib/utils/zipcode";
 
@@ -37,6 +37,11 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
   // Local hobby state for editing
   const [localHobbies, setLocalHobbies] = useState<UserHobby[]>([]);
 
+  // Local photo state for editing
+  const [localPhotos, setLocalPhotos] = useState<(UserPhoto | PendingPhoto)[]>([]);
+  const [photosToDelete, setPhotosToDelete] = useState<Array<{ id: string; storagePath: string | null }>>([]);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+
   // Initialize form data when profile loads
   useEffect(() => {
     if (profile) {
@@ -51,6 +56,11 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
       });
       // Initialize local hobbies
       setLocalHobbies(profile.hobbies || []);
+      
+      // Initialize local photos
+      setLocalPhotos(profile.photos || []);
+      setPhotosToDelete([]);
+      setPhotoError(null);
       
       // Show location for existing zipcode
       if (profile.zipcode) {
@@ -100,13 +110,61 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
   };
 
   const handleNumberInputChange = (field: string, value: string) => {
-    // Handle empty string or invalid numbers
-    const numValue = value === '' ? '' : parseInt(value);
-    if (value === '' || (!isNaN(numValue) && numValue >= 0)) {
-      setFormData(prev => ({
-        ...prev,
-        [field]: value === '' ? '' : numValue
+    const trimmed = value.trim();
+    if (trimmed === "") {
+      setFormData(prev => ({ ...prev, [field]: "" }));
+      return;
+    }
+
+    const parsed = Number(trimmed);
+    if (!Number.isNaN(parsed) && parsed >= 0) {
+      setFormData(prev => ({ ...prev, [field]: parsed }));
+    }
+  };
+
+  const handlePhotoChange = (operation: PhotoOperation) => {
+    setPhotoError(null);
+    
+    if (operation.type === 'add') {
+      // Create pending photos with preview URLs
+      const pendingPhotos: PendingPhoto[] = operation.files.map((file, index) => ({
+        id: `pending-${Date.now()}-${index}`,
+        file,
+        preview_url: URL.createObjectURL(file),
+        display_order: localPhotos.length + index,
+        is_primary: localPhotos.length === 0 && index === 0,
       }));
+      
+      setLocalPhotos(prev => [...prev, ...pendingPhotos]);
+    } else if (operation.type === 'delete') {
+      const photoToDelete = localPhotos.find(p => p.id === operation.photoId);
+      
+      // Track for deletion if it's an existing photo
+      if (photoToDelete && !('file' in photoToDelete)) {
+        setPhotosToDelete(prev => [...prev, { 
+          id: operation.photoId, 
+          storagePath: operation.storagePath 
+        }]);
+      }
+      
+      // Remove from preview URL if it's a pending photo
+      if (photoToDelete && 'file' in photoToDelete) {
+        URL.revokeObjectURL(photoToDelete.preview_url);
+      }
+      
+      // Remove from local photos
+      const filtered = localPhotos.filter(p => p.id !== operation.photoId);
+      
+      // Reindex and update primary
+      const reindexed = filtered.map((photo, index) => ({
+        ...photo,
+        display_order: index,
+        is_primary: index === 0,
+      }));
+      
+      setLocalPhotos(reindexed);
+    } else if (operation.type === 'reorder') {
+      setLocalPhotos(operation.photos);
     }
   };
 
@@ -121,6 +179,7 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
 
     setSaveError(null);
     setSaveSuccess(false);
+    setPhotoError(null);
     setIsSaving(true);
 
     try {
@@ -166,10 +225,14 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
       // Save hobby changes
       await saveHobbyChanges();
 
+      // Save photo changes
+      await savePhotoChanges();
+
       setSaveSuccess(true);
       
-      // Wait a moment for database consistency
+      // Wait a moment for database consistency, then refresh to get updated data
       await new Promise(resolve => setTimeout(resolve, 200));
+      await refresh();
       onSaveSuccess?.();
       
       // Clear success message after 3 seconds
@@ -181,48 +244,228 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
     }
   };
 
+  const savePhotoChanges = async () => {
+    if (!session) return;
+
+    const supabase = getSupabaseBrowserClient();
+    const existingPhotos = localPhotos.filter((p): p is UserPhoto => !('file' in p));
+    const pendingPhotos = localPhotos.filter((p): p is PendingPhoto => 'file' in p);
+
+    // Step 1: Batch delete from storage
+    if (photosToDelete.length > 0) {
+      const storagePaths = photosToDelete
+        .map(p => p.storagePath)
+        .filter((path): path is string => !!path);
+      
+      if (storagePaths.length > 0) {
+        const { error: storageError } = await supabase.storage
+          .from('user-photos')
+          .remove(storagePaths);
+          
+        if (storageError) {
+          console.warn('Failed to delete from storage:', storageError);
+        }
+      }
+      
+      // Batch delete from database
+      const idsToDelete = photosToDelete.map(p => p.id);
+      const { error: deleteError } = await supabase
+        .from("user_photos")
+        .delete()
+        .in("id", idsToDelete);
+        
+      if (deleteError) {
+        throw new Error(`Failed to delete photos: ${deleteError.message}`);
+      }
+    }
+
+    // Step 2: Upload new photos to storage first
+    const uploadedPhotos: Array<{
+      user_id: string;
+      photo_url: string;
+      storage_path: string;
+      display_order: number;
+      is_primary: boolean;
+    }> = [];
+
+    for (const pending of pendingPhotos) {
+      const fileExt = pending.file.name.split('.').pop();
+      const storagePath = `${session.user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('user-photos')
+        .upload(storagePath, pending.file);
+        
+      if (uploadError) {
+        throw new Error(`Failed to upload photo: ${uploadError.message}`);
+      }
+      
+      const { data: urlData } = supabase.storage
+        .from('user-photos')
+        .getPublicUrl(storagePath);
+        
+      uploadedPhotos.push({
+        user_id: session.user.id,
+        photo_url: urlData.publicUrl,
+        storage_path: storagePath,
+        display_order: pending.display_order,
+        is_primary: pending.is_primary,
+      });
+      
+      URL.revokeObjectURL(pending.preview_url);
+    }
+
+    // Step 3: Batch insert new photos
+    if (uploadedPhotos.length > 0) {
+      const { error: insertError } = await supabase
+        .from("user_photos")
+        .insert(uploadedPhotos);
+        
+      if (insertError) {
+        throw new Error(`Failed to save photos: ${insertError.message}`);
+      }
+    }
+
+    // Step 4: Batch update existing photos (order and primary status)
+    if (existingPhotos.length > 0) {
+      // Use individual updates since batch update of different values is complex
+      for (const photo of existingPhotos) {
+        const { error: updateError } = await supabase
+          .from("user_photos")
+          .update({
+            display_order: photo.display_order,
+            is_primary: photo.is_primary,
+          })
+          .eq("id", photo.id);
+          
+        if (updateError) {
+          throw new Error(`Failed to update photo order: ${updateError.message}`);
+        }
+      }
+    }
+  };
+
   const saveHobbyChanges = async () => {
     if (!session) return;
 
     const supabase = getSupabaseBrowserClient();
+    type UserHobbyRow = {
+      id: string;
+      user_id: string;
+      hobby_id: string;
+      preference_rank: number;
+    };
     
     // Get current hobbies from database
     const { data: currentHobbies, error: fetchError } = await supabase
       .from("user_hobbies")
-      .select("*")
+      .select("id, user_id, hobby_id, preference_rank")
       .eq("user_id", session.user.id);
 
     if (fetchError) {
       throw new Error(`Failed to fetch current hobbies: ${fetchError.message}`);
     }
 
-    // Delete all current hobbies
-    if (currentHobbies && currentHobbies.length > 0) {
-      const { error: deleteError } = await supabase
-        .from("user_hobbies")
-        .delete()
-        .eq("user_id", session.user.id);
+    const normalizedCurrentHobbies: UserHobbyRow[] = (currentHobbies ?? []).flatMap(
+      (hobby) => {
+        if (!hobby || !hobby.id || !hobby.hobby_id) {
+          return [];
+        }
 
-      if (deleteError) {
-        throw new Error(`Failed to delete current hobbies: ${deleteError.message}`);
+        return [
+          {
+            id: hobby.id,
+            user_id: hobby.user_id ?? session.user.id,
+            hobby_id: hobby.hobby_id,
+            preference_rank: hobby.preference_rank ?? 0,
+          },
+        ];
+      }
+    );
+
+    const currentHobbyMap = new Map(
+      normalizedCurrentHobbies.map((hobby) => [hobby.hobby_id, hobby])
+    );
+    const desiredHobbyMap = new Map(
+      localHobbies.map((hobby) => [hobby.hobby_id, hobby])
+    );
+
+    const hobbiesToInsert: Array<Omit<UserHobbyRow, "id">> = [];
+    const hobbiesToUpdate: UserHobbyRow[] = [];
+
+    for (const hobby of localHobbies) {
+      const existing = currentHobbyMap.get(hobby.hobby_id);
+
+      if (!existing) {
+        hobbiesToInsert.push({
+          user_id: session.user.id,
+          hobby_id: hobby.hobby_id,
+          preference_rank: hobby.preference_rank,
+        });
+        continue;
+      }
+
+      if (existing.preference_rank !== hobby.preference_rank) {
+        hobbiesToUpdate.push({
+          id: existing.id,
+          user_id: session.user.id,
+          hobby_id: existing.hobby_id,
+          preference_rank: hobby.preference_rank,
+        });
       }
     }
 
-    // Insert new hobbies
-    if (localHobbies.length > 0) {
-      const hobbiesToInsert = localHobbies.map(hobby => ({
-        user_id: session.user.id,
-        hobby_id: hobby.hobby_id,
-        preference_rank: hobby.preference_rank,
+    const hobbiesToDelete = normalizedCurrentHobbies
+      .filter((hobby) => !desiredHobbyMap.has(hobby.hobby_id))
+      .map((hobby) => hobby.id);
+
+    if (hobbiesToDelete.length > 0) {
+      const { error: deleteError } = await supabase
+        .from("user_hobbies")
+        .delete()
+        .in("id", hobbiesToDelete);
+
+      if (deleteError) {
+        throw new Error(`Failed to remove hobbies: ${deleteError.message}`);
+      }
+    }
+
+    if (hobbiesToUpdate.length > 0) {
+      const TEMP_RANK_OFFSET = 1000;
+      // Two-phase update avoids unique constraint collisions while ranks swap
+      const tempUpdates = hobbiesToUpdate.map((hobby) => ({
+        ...hobby,
+        preference_rank: hobby.preference_rank + TEMP_RANK_OFFSET,
       }));
 
+      const { error: tempUpdateError } = await supabase
+        .from("user_hobbies")
+        .upsert(tempUpdates, { onConflict: "id" });
+
+      if (tempUpdateError) {
+        throw new Error(
+          `Failed to prepare hobby rank updates: ${tempUpdateError.message}`
+        );
+      }
+
+      const { error: finalUpdateError } = await supabase
+        .from("user_hobbies")
+        .upsert(hobbiesToUpdate, { onConflict: "id" });
+
+      if (finalUpdateError) {
+        throw new Error(
+          `Failed to update hobby ranks: ${finalUpdateError.message}`
+        );
+      }
+    }
+
+    if (hobbiesToInsert.length > 0) {
       const { error: insertError } = await supabase
         .from("user_hobbies")
         .insert(hobbiesToInsert);
 
       if (insertError) {
-        console.error('Hobby insert error:', insertError);
-        throw new Error(`Failed to save hobbies: ${insertError.message}`);
+        throw new Error(`Failed to add hobbies: ${insertError.message}`);
       }
     }
   };
@@ -281,7 +524,11 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
       {/* Photo Management */}
       <div className="space-y-4">
         <h2 className="text-lg font-medium">Photos</h2>
-        <PhotoManagement onUpdate={refresh} />
+        <PhotoManagement 
+          photos={localPhotos}
+          onPhotoChange={handlePhotoChange}
+          error={photoError}
+        />
       </div>
 
       {/* Basic Information */}
@@ -423,11 +670,49 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
         </div>
       </div>
 
-      {/* Save Button */}
-      <div className="flex justify-end pt-4 border-t">
+      {/* Save/Cancel Buttons */}
+      <div className="flex justify-end gap-3 pt-4 border-t">
+        <button
+          onClick={() => {
+            // Revert all changes
+            if (profile) {
+              setFormData({
+                full_name: profile.full_name || "",
+                bio: profile.bio || "",
+                zipcode: profile.zipcode || "",
+                age: profile.age?.toString() || "",
+                age_range_min: profile.age_range_min || 18,
+                age_range_max: profile.age_range_max || 100,
+                distance_radius: profile.distance_radius || 50,
+              });
+              setLocalHobbies(profile.hobbies || []);
+              
+              // Clean up pending photo preview URLs
+              localPhotos.filter((p): p is PendingPhoto => 'file' in p)
+                .forEach(p => URL.revokeObjectURL(p.preview_url));
+              
+              setLocalPhotos(profile.photos || []);
+              setPhotosToDelete([]);
+              setPhotoError(null);
+              setSaveError(null);
+              setZipcodeError("");
+              
+              if (profile.zipcode) {
+                const location = zipcodeToLocation(profile.zipcode);
+                if (location) {
+                  setLocationDisplay(location);
+                }
+              }
+            }
+          }}
+          disabled={isSaving}
+          className="px-6 py-2 font-medium border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+        >
+          Cancel
+        </button>
         <button
           onClick={handleSave}
-          disabled={isSaving}
+          disabled={isSaving || !!zipcodeError}
           className="px-6 py-2 font-medium bg-black !text-white rounded-lg hover:bg-gray-800 disabled:opacity-50"
         >
           {isSaving ? "Saving..." : "Save Changes"}

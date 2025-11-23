@@ -74,14 +74,14 @@ export function AccountDeletion() {
   if (!showConfirmation) {
     return (
       <div className="space-y-4">
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <h3 className="text-sm font-medium text-red-900 mb-2">
+        <div className="rounded-lg border border-error-200 bg-error-50 p-4">
+          <h3 className="mb-2 text-sm font-medium text-error-700">
             ⚠️ Warning: This action cannot be undone
           </h3>
-          <p className="text-sm text-red-800">
+          <p className="text-sm text-error-600">
             Deleting your account will permanently remove:
           </p>
-          <ul className="mt-2 text-sm text-red-800 list-disc list-inside space-y-1">
+          <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-error-600">
             <li>Your profile and all personal information</li>
             <li>All uploaded photos</li>
             <li>Your hobby selections and preferences</li>
@@ -92,7 +92,7 @@ export function AccountDeletion() {
         
         <button
           onClick={() => setShowConfirmation(true)}
-          className="px-6 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+          className="rounded-md bg-error-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-error-700"
         >
           I Want to Delete My Account
         </button>
@@ -102,18 +102,18 @@ export function AccountDeletion() {
 
   return (
     <div className="space-y-4">
-      <div className="bg-red-50 border border-red-200 rounded-md p-4">
-        <h3 className="text-sm font-medium text-red-900 mb-2">
+      <div className="rounded-lg border border-error-200 bg-error-50 p-4">
+        <h3 className="mb-2 text-sm font-medium text-error-700">
           Final Confirmation Required
         </h3>
-        <p className="text-sm text-red-800 mb-4">
+        <p className="mb-4 text-sm text-error-600">
           This will permanently delete your account and all associated data.
           This action cannot be reversed.
         </p>
         
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-red-900 mb-2">
+            <label className="mb-2 block text-sm font-medium text-error-700">
               Type <span className="font-bold">{CONFIRMATION_PHRASE}</span> to confirm:
             </label>
             <input
@@ -122,7 +122,7 @@ export function AccountDeletion() {
               onChange={(e) => setConfirmationText(e.target.value)}
               placeholder={CONFIRMATION_PHRASE}
               disabled={isDeleting}
-              className="w-full px-3 py-2 border border-red-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
+              className="w-full rounded-md border border-error-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-error-500 disabled:cursor-not-allowed disabled:bg-ink-50"
             />
           </div>
 
@@ -130,7 +130,7 @@ export function AccountDeletion() {
             <button
               onClick={handleDeleteAccount}
               disabled={isDeleting || confirmationText !== CONFIRMATION_PHRASE}
-              className="px-6 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-md bg-error-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-error-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isDeleting ? "Deleting Account..." : "Delete My Account Permanently"}
             </button>
@@ -141,7 +141,7 @@ export function AccountDeletion() {
                 setMessage(null);
               }}
               disabled={isDeleting}
-              className="px-6 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-md border border-ink-200 px-6 py-2 text-sm font-medium text-ink-700 transition hover:bg-ink-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>
@@ -151,13 +151,7 @@ export function AccountDeletion() {
 
       {/* Message Display */}
       {message && (
-        <div
-          className={`p-3 rounded-md text-sm ${
-            message.type === "success"
-              ? "bg-green-50 text-green-800 border border-green-200"
-              : "bg-red-50 text-red-800 border border-red-200"
-          }`}
-        >
+        <div className={message.type === "success" ? "alert-success" : "alert-error"}>
           {message.text}
         </div>
       )}
