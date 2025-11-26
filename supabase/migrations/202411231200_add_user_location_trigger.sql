@@ -31,3 +31,4 @@ BEFORE INSERT OR UPDATE ON public.users
 FOR EACH ROW
 EXECUTE FUNCTION public.handle_user_location_point_sync();
 
+

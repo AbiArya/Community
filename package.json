@@ -10,7 +10,9 @@
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "cy:open": "cypress open",
-    "cy:run": "cypress run"
+    "cy:run": "cypress run",
+    "seed:test-users": "tsx scripts/seed-test-users.ts",
+    "cleanup:test-users": "tsx scripts/cleanup-test-users.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
@@ -29,6 +31,8 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/zipcodes": "^8.0.3",
+    "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
     "identity-obj-proxy": "^3.0.0",
@@ -36,6 +40,7 @@
     "jest-environment-jsdom": "^30.0.5",
     "tailwindcss": "^4",
     "ts-jest": "^29.4.1",
+    "tsx": "^4.19.2",
     "typescript": "^5",
     "whatwg-fetch": "^3.6.20"
   }

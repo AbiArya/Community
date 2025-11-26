@@ -1,0 +1,9 @@
+{
+  "crons": [
+    {
+      "path": "/api/matches/batch-generate",
+      "schedule": "0 3 * * 1"
+    }
+  ]
+}
+

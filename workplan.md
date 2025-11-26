@@ -106,7 +106,7 @@ A friend-matching web application that connects users based on shared hobbies an
 - [x] Add age range and distance preferences
 - [x] Create account deletion option
 - Note: Match frequency is fixed at 2 per week (not user-configurable)
-- Note: Phone numbers not collected (in-app messaging planned for future)
+- Note: Phone numbers not collected (in-app messaging implemented in Phase 6.3)
 
 #### Milestone 5.2: UI Refresh & Theming ✅
 - [x] Run full UI audit to catalog visual inconsistencies and usability gaps
@@ -119,12 +119,12 @@ A friend-matching web application that connects users based on shared hobbies an
 ### Phase 6: Matching Algorithm & System ⏳
 **Timeline**: Week 5-6
 
-#### Milestone 6.1: Matching Logic
-- [ ] Design similarity scoring algorithm
-- [ ] Implement hobby-based matching
-- [ ] Add geographic proximity filtering
-- [ ] Create match generation cron job
-- [ ] Set up weekly match scheduling
+#### Milestone 6.1: Matching Logic ✅
+- [x] Design similarity scoring algorithm
+- [x] Implement hobby-based matching
+- [x] Add geographic proximity filtering
+- [x] Create match generation cron job
+- [x] Set up weekly match scheduling
 
 #### Milestone 6.2: Match Display & Interaction
 - [ ] Design match cards interface (view-only)
@@ -133,8 +133,34 @@ A friend-matching web application that connects users based on shared hobbies an
 - [ ] Create simple contact display/connection
 - [ ] Create match statistics dashboard
 
+#### Milestone 6.3: Live Chat & Messaging
+- [ ] Design messages table schema
+- [ ] Design conversations/threads table schema
+- [ ] Add RLS policies for message privacy
+- [ ] Create database indexes for query optimization
+- [ ] Set up Supabase Realtime subscriptions for messages
+- [ ] Configure presence tracking for online/offline status
+- [ ] Implement typing indicators
+- [ ] Add read receipts tracking
+- [ ] Design chat list/inbox page (all conversations)
+- [ ] Create conversation thread component (individual chat)
+- [ ] Build message composer with emoji support
+- [ ] Add image/photo sharing in messages
+- [ ] Implement message timestamps and read indicators
+- [ ] Design mobile-optimized chat interface
+- [ ] Implement sending and receiving text messages
+- [ ] Add real-time message updates
+- [ ] Create push notifications for new messages
+- [ ] Add conversation search/filtering
+- [ ] Implement message moderation/reporting
+- [ ] Add conversation archiving/deletion
+- [ ] Add "Start Chat" button on match cards
+- [ ] Create unread message badge on navigation
+- [ ] Link match profiles to chat threads
+- [ ] Add chat history to match details
+
 ### Phase 7: Testing & Polish ⏳
-**Timeline**: Week 7
+**Timeline**: Week 7-8
 
 #### Milestone 7.1: Testing & Bug Fixes
 - [ ] Unit test core components
@@ -152,7 +178,7 @@ A friend-matching web application that connects users based on shared hobbies an
 - [ ] Improve accessibility (WCAG compliance)
 
 ### Phase 8: Deployment & Launch ⏳
-**Timeline**: Week 8
+**Timeline**: Week 9
 
 #### Milestone 8.1: Production Setup
 - [ ] Configure Vercel deployment
@@ -250,6 +276,35 @@ matches (
 )
 ```
 
+#### Conversations Table
+```sql
+conversations (
+  id UUID PRIMARY KEY,
+  match_id UUID REFERENCES matches(id),
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  last_message_at TIMESTAMP,
+  last_message_preview TEXT
+)
+```
+
+#### Messages Table
+```sql
+messages (
+  id UUID PRIMARY KEY,
+  conversation_id UUID REFERENCES conversations(id),
+  sender_id UUID REFERENCES users(id),
+  receiver_id UUID REFERENCES users(id),
+  content TEXT,
+  message_type VARCHAR DEFAULT 'text', -- 'text', 'image', 'system'
+  is_read BOOLEAN DEFAULT false,
+  read_at TIMESTAMP,
+  created_at TIMESTAMP,
+  deleted_by_sender BOOLEAN DEFAULT false,
+  deleted_by_receiver BOOLEAN DEFAULT false
+)
+```
+
 ### File Structure
 ```
 src/
@@ -260,7 +315,8 @@ src/
 │   ├── (dashboard)/
 │   │   ├── profile/
 │   │   ├── settings/
-│   │   └── matches/
+│   │   ├── matches/
+│   │   └── messages/
 │   ├── globals.css
 │   ├── layout.tsx
 │   └── page.tsx
@@ -268,7 +324,8 @@ src/
 │   ├── ui/
 │   ├── auth/
 │   ├── profile/
-│   └── matches/
+│   ├── matches/
+│   └── messaging/
 ├── lib/
 │   ├── supabase/
 │   ├── utils/
@@ -297,10 +354,31 @@ src/
 #### User Experience
 - **Onboarding**: Step-by-step profile creation with progress tracking
 - **Match Cards**: Tinder-style card interface with detailed profiles
-- **Messaging**: Basic chat initiation for accepted matches
+- **Messaging**: Real-time chat with matches (Hinge/Tinder-style inbox and conversation threads)
 - **Settings**: Granular control over matching preferences
 
-## Current Status: Phase 5 Complete ✅ - Ready for Phase 6
+## Current Status: Phase 6.1 Complete ✅ - Ready for Phase 6.2
+
+**Completed in Phase 6.1**:
+- [x] **Matching Algorithm** - Weighted similarity scoring (hobby 60%, location 30%, activity 10%)
+- [x] **Hobby Compatibility** - Rank-based scoring with shared hobby detection
+- [x] **Geographic Filtering** - PostGIS-powered distance calculations with exponential decay
+- [x] **Activity Scoring** - Recent activity rewards for better matching
+- [x] **Diversity Filter** - Prevents repetitive matches by penalizing recent pairs
+- [x] **Database Functions** - PostGIS functions for efficient candidate retrieval
+- [x] **Match Generation API** - Individual user match generation endpoint
+- [x] **Batch Processing API** - Weekly cron job for all users
+- [x] **Vercel Cron Setup** - Scheduled for every Monday at 3 AM UTC
+- [x] **Comprehensive Testing** - 27 passing unit tests for algorithm components
+
+**Files Created**:
+- `src/lib/matching/algorithm.ts` - Core matching algorithm
+- `src/lib/matching/database.ts` - Database utilities for matching
+- `src/app/api/matches/generate/route.ts` - Individual match generation
+- `src/app/api/matches/batch-generate/route.ts` - Batch processing endpoint
+- `supabase/migrations/202411240001_create_matching_functions.sql` - PostGIS functions
+- `src/lib/matching/__tests__/algorithm.test.ts` - Comprehensive unit tests
+- `vercel.json` - Cron job configuration
 
 **Completed in Phase 4 & 5**:
 - [x] Photos persisted to Supabase Storage and `user_photos` table
@@ -316,13 +394,12 @@ src/
 - [x] **Reusable Tailwind utilities created** (buttons, cards, forms, alerts)
 - [x] **Style guide created** with practical component patterns
 
-**Documentation Created**:
-- `UI-AUDIT.md` - Initial audit findings
-- `DESIGN-TOKENS.md` - Complete design token reference
-- `STYLE-GUIDE.md` - Practical component patterns and examples
-- `UI-REFRESH-SUMMARY.md` - Summary of UI refresh completion
-
-**Next Phase: Phase 6 - Matching Algorithm & System**
+**Next Phase: Phase 6.2 - Match Display & Interaction**
+- Match cards interface (view-only)
+- Match history page
+- Match viewing tracking
+- Simple contact display/connection
+- Match statistics dashboard
 
 ## Risk Assessment
 - **High Risk**: Matching algorithm accuracy and user satisfaction
@@ -336,5 +413,5 @@ src/
 - Average session duration > 5 minutes
 
 ---
-*Last Updated*: 2025-09-03
+*Last Updated*: 2025-11-23
 *Status*: In Progress
