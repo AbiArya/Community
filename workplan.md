@@ -5,12 +5,17 @@ A friend-matching web application that connects users based on shared hobbies an
 
 ## Tech Stack
 - **Frontend**: Next.js 15 (App Router)
-- **Authentication**: Supabase Auth (Email magic link)
-- **Database**: Supabase PostgreSQL
-- **File Storage**: Supabase Storage
+- **Authentication**: Supabase Auth (Email magic link) → Migrating to AWS Cognito
+- **Database**: Supabase PostgreSQL → Migrating to AWS RDS PostgreSQL
+- **File Storage**: Supabase Storage → Migrating to AWS S3 + CloudFront
 - **Styling**: Tailwind CSS
-- **Deployment**: Vercel
+- **Deployment**: Vercel (keeping for now)
 - **Version Control**: Git/GitHub
+
+## AWS Migration Status
+📍 **Phase 0: Preparation** - 75% Complete (Awaiting AWS credentials)
+- Branch: `feature/aws-migration`
+- See: `AWS-MIGRATION-PLAN.md`, `aws/START-HERE.md`, `PHASE-0-STATUS.md`
 
 ## Current Focus: UI Refresh & Theme Consistency
 - Prioritize fixing visual issues across existing flows before shipping new features.
