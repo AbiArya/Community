@@ -33,6 +33,17 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# AWS specific
+aws/cdk/cdk.out/
+aws/cdk/.cdk.staging/
+aws/cdk/cdk.context.json
+aws/lambdas/**/node_modules/
+aws/lambdas/**/*.zip
+aws/migrations/node_modules/
+.aws-sam/
+*.pem
+*.key
+
 # vercel
 .vercel
 

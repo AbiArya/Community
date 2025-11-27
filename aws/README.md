@@ -1,301 +1,193 @@
-# AWS Infrastructure for Community Friends App
+# AWS Infrastructure
 
-This directory contains all AWS-related infrastructure code, Lambda functions, and migration scripts for moving from Supabase to AWS.
+This directory contains all AWS-specific code for migrating the Community Friends App from Supabase to AWS.
 
 ## Directory Structure
 
 ```
 aws/
-├── cdk/                    # Infrastructure as Code (AWS CDK)
-│   ├── bin/               # CDK app entry point
-│   ├── lib/               # CDK stack definitions
-│   │   ├── network-stack.ts       # VPC, subnets, security groups
-│   │   ├── database-stack.ts      # RDS PostgreSQL with PostGIS
-│   │   ├── storage-stack.ts       # S3 + CloudFront
-│   │   ├── auth-stack.ts          # (TODO) Cognito
-│   │   ├── api-stack.ts           # (TODO) API Gateway + Lambda
-│   │   ├── messaging-stack.ts     # (TODO) AppSync or WebSockets
-│   │   └── monitoring-stack.ts    # (TODO) CloudWatch dashboards
-│   ├── cdk.json           # CDK configuration
-│   ├── package.json       # CDK dependencies
-│   └── tsconfig.json      # TypeScript config
-│
-├── lambdas/               # Lambda function code
-│   ├── shared/            # Shared utilities
-│   ├── matching/          # (TODO) Match generation functions
-│   ├── auth/              # (TODO) Custom auth flows
-│   ├── websocket/         # (TODO) WebSocket handlers
-│   └── image-processor/   # (TODO) Image optimization
-│
-├── migrations/            # Database migration scripts
-│   ├── schema.sql         # (TODO) AWS-compatible schema
-│   ├── export-supabase-data.ts   # (TODO) Data export
-│   └── migrate-from-supabase.ts  # (TODO) Migration script
-│
-├── appsync/               # (TODO) AppSync GraphQL schema
-│   ├── schema.graphql
-│   └── resolvers/
-│
-├── docs/                  # Documentation
-│   └── architecture.md    # (TODO) Architecture diagrams
-│
-├── AWS-MIGRATION-PLAN.md  # Complete migration plan
-├── QUICK-START.md         # Getting started guide
-└── README.md              # This file
+├── cdk/              # Infrastructure as Code (AWS CDK)
+│   ├── bin/          # CDK app entry point
+│   ├── lib/          # Stack definitions
+│   └── package.json  # CDK dependencies
+├── lambdas/          # Lambda function code
+│   ├── auth/         # Authentication functions
+│   ├── matching/     # Match generation
+│   ├── websocket/    # WebSocket handlers
+│   └── shared/       # Shared utilities
+├── migrations/       # Database migration scripts
+├── scripts/          # Setup and deployment scripts
+└── docs/            # Documentation
 ```
 
-## Current Status
+## Quick Start
 
-### ✅ Completed
-- Network infrastructure (VPC, subnets, security groups)
-- Database infrastructure (RDS PostgreSQL with PostGIS)
-- Storage infrastructure (S3 + CloudFront)
-- CDK boilerplate and configuration
+### 1. Phase 0 Setup
 
-### 🚧 In Progress
-- Nothing yet - ready to start Phase 1!
+Run the automated setup script:
 
-### ⏳ TODO
-- Database schema migration (Phase 1.2)
-- Data migration from Supabase (Phase 1.3)
-- Lambda functions for matching (Phase 4)
-- Cognito authentication (Phase 3)
-- Real-time messaging with AppSync (Phase 5)
-- Monitoring and alarms (Phase 7)
+```bash
+./aws/scripts/setup-phase0.sh
+```
 
-## Getting Started
+Or follow the manual steps in `docs/PHASE-0-CHECKLIST.md`
 
-**If you're new to AWS:**
-1. Read `QUICK-START.md` first
-2. Deploy the network stack
-3. Deploy the database stack
-4. Deploy the storage stack
-5. Come back here for next steps
+### 2. Deploy Infrastructure
 
-**If you already deployed infrastructure:**
-1. Read `AWS-MIGRATION-PLAN.md`
-2. Continue with Phase 1.2: Schema Migration
+Follow the guide in `QUICK-START.md`:
 
-## Infrastructure Stacks
-
-### NetworkStack (`network-stack.ts`)
-Creates foundational networking:
-- VPC (10.0.0.0/16)
-- 2 Availability Zones
-- Public subnets (for NAT, bastion)
-- Private subnets (for Lambda)
-- Database subnets (isolated, for RDS)
-- Security groups for RDS and Lambda
-- NAT gateway for outbound internet
-
-**Deployed as:** `CommunityNetwork-{env}`
-
-### DatabaseStack (`database-stack.ts`)
-Creates PostgreSQL database:
-- RDS PostgreSQL 15
-- Instance: db.t4g.micro (dev) / db.t4g.small (prod)
-- 20GB storage with auto-scaling
-- Multi-AZ in production
-- Automated backups (7 days)
-- PostGIS extension ready
-- Credentials in Secrets Manager
-
-**Deployed as:** `CommunityDatabase-{env}`
-
-### StorageStack (`storage-stack.ts`)
-Creates photo storage:
-- S3 bucket (private)
-- CloudFront distribution
-- CORS configuration
-- Lifecycle policies
-- Versioning (prod only)
-
-**Deployed as:** `CommunityStorage-{env}`
-
-## Deployment Commands
-
-### Deploy All Stacks
 ```bash
 cd aws/cdk
-npm install
 
-# Development environment
-cdk deploy --all --context environment=dev
-
-# Production environment
-cdk deploy --all --context environment=prod
-```
-
-### Deploy Individual Stack
-```bash
+# Deploy network (VPC, subnets, security groups)
 cdk deploy CommunityNetwork-dev
+
+# Deploy database (RDS PostgreSQL with PostGIS)
 cdk deploy CommunityDatabase-dev
+
+# Deploy storage (S3 + CloudFront)
 cdk deploy CommunityStorage-dev
 ```
 
-### Preview Changes
-```bash
-cdk diff CommunityNetwork-dev
-```
+## Available Stacks
 
-### Destroy Infrastructure
-```bash
-# Destroy specific stack
-cdk destroy CommunityDatabase-dev
+### Development Environment
 
-# Destroy all (CAREFUL!)
-cdk destroy --all
-```
+- `CommunityNetwork-dev` - VPC, subnets, NAT gateway
+- `CommunityDatabase-dev` - RDS PostgreSQL with PostGIS
+- `CommunityStorage-dev` - S3 bucket + CloudFront CDN
+
+### Production Environment
+
+- `CommunityNetwork-prod` - Production VPC
+- `CommunityDatabase-prod` - Multi-AZ RDS with backups
+- `CommunityStorage-prod` - Production S3 + CloudFront
 
 ## Environment Variables
 
-After deploying, add these to your `.env.aws.local`:
+Copy `env.aws.template` to `.env.aws.local` and fill in your values:
 
 ```bash
-# AWS Config
-AWS_REGION=us-east-1
-AWS_ACCOUNT_ID=123456789012
-
-# Database (from DatabaseStack outputs)
-AWS_RDS_ENDPOINT=xxx.rds.amazonaws.com
-AWS_RDS_PORT=5432
-AWS_RDS_DATABASE=community
-AWS_RDS_SECRET_ARN=arn:aws:secretsmanager:...
-
-# Storage (from StorageStack outputs)
-AWS_S3_PHOTOS_BUCKET=community-app-photos-dev-123456789012
-AWS_CLOUDFRONT_DOMAIN=xxx.cloudfront.net
-
-# API Gateway (Phase 4)
-AWS_API_GATEWAY_URL=https://xxx.execute-api.us-east-1.amazonaws.com/prod
-
-# Cognito (Phase 3)
-AWS_COGNITO_USER_POOL_ID=us-east-1_xxxxx
-AWS_COGNITO_CLIENT_ID=xxxxx
-
-# AppSync (Phase 5)
-AWS_APPSYNC_ENDPOINT=https://xxx.appsync-api.us-east-1.amazonaws.com/graphql
+cp ../env.aws.template ../.env.aws.local
 ```
 
-## Cost Monitoring
+Required variables:
+- `AWS_REGION` - Your AWS region (us-east-1)
+- `AWS_ACCOUNT_ID` - Your AWS account ID
+- `AWS_PROFILE` - AWS CLI profile name (community-app)
 
-### Current Monthly Costs (Estimated)
+## Useful Commands
 
-**Development (Free Tier):**
-- RDS db.t4g.micro: $0 (free tier)
-- Lambda: $0 (under 1M requests)
-- S3: $0 (under 5GB)
-- NAT Gateway: ~$32/month ⚠️ (largest cost)
-- **Total: ~$32/month**
+### CDK Commands
 
-**To reduce NAT costs in dev:**
-- Option 1: Destroy when not in use
-- Option 2: Remove NAT, use public subnets for Lambda (less secure)
-- Option 3: VPN to your VPC, access private resources directly
-
-**Production (After Free Tier):**
-- RDS db.t4g.small: ~$25/month
-- NAT Gateway: ~$32/month
-- Other services: ~$20/month
-- **Total: ~$80-100/month** (scales with usage)
-
-### Set Up Billing Alerts
-
-1. Go to [AWS Budgets](https://console.aws.amazon.com/billing/home#/budgets)
-2. Create budget: "Monthly AWS Spending"
-3. Set threshold: $50
-4. Add your email for alerts
-
-## Security Best Practices
-
-### ✅ Currently Implemented
-- Database in private subnets (no internet access)
-- Credentials stored in Secrets Manager
-- S3 bucket is private by default
-- HTTPS only via CloudFront
-- Security groups restrict access
-
-### ⚠️ TODO Before Production
-- [ ] Remove open database security group rule (0.0.0.0/0)
-- [ ] Use bastion host or VPN for database access
-- [ ] Enable MFA delete on S3 bucket
-- [ ] Enable AWS GuardDuty for threat detection
-- [ ] Set up AWS Config for compliance monitoring
-- [ ] Implement least-privilege IAM policies
-- [ ] Enable CloudTrail for audit logging
-- [ ] Add WAF to CloudFront (protect against attacks)
-
-## Monitoring & Debugging
-
-### View Logs
 ```bash
-# Lambda logs
-aws logs tail /aws/lambda/community-matching-dev --follow
+# List all stacks
+cdk list
 
-# RDS logs
-aws rds describe-db-log-files --db-instance-identifier community-database-dev
+# Synthesize CloudFormation template
+cdk synth CommunityNetwork-dev
+
+# Show what will change
+cdk diff CommunityNetwork-dev
+
+# Deploy a stack
+cdk deploy CommunityNetwork-dev
+
+# Deploy all stacks
+cdk deploy --all
+
+# Destroy a stack (careful!)
+cdk destroy CommunityNetwork-dev
 ```
 
-### View Metrics
+### AWS CLI Commands
+
 ```bash
-# RDS metrics
-aws cloudwatch get-metric-statistics \
-  --namespace AWS/RDS \
-  --metric-name CPUUtilization \
-  --dimensions Name=DBInstanceIdentifier,Value=community-database-dev \
-  --start-time 2025-11-26T00:00:00Z \
-  --end-time 2025-11-26T23:59:59Z \
-  --period 3600 \
-  --statistics Average
+# Check authentication
+aws sts get-caller-identity
+
+# List RDS instances
+aws rds describe-db-instances
+
+# List S3 buckets
+aws s3 ls
+
+# Get secret value
+aws secretsmanager get-secret-value --secret-id community-db-credentials-dev
 ```
 
-### AWS Console Links
-- [CloudFormation Stacks](https://console.aws.amazon.com/cloudformation)
-- [RDS Databases](https://console.aws.amazon.com/rds)
-- [S3 Buckets](https://console.aws.amazon.com/s3)
-- [Lambda Functions](https://console.aws.amazon.com/lambda)
-- [CloudWatch Logs](https://console.aws.amazon.com/cloudwatch/home#logsV2:log-groups)
-- [VPC Dashboard](https://console.aws.amazon.com/vpc)
-- [Secrets Manager](https://console.aws.amazon.com/secretsmanager)
+## Migration Progress
+
+Follow the migration plan in `/AWS-MIGRATION-PLAN.md`
+
+Current status:
+- [x] Phase 0: Preparation & Setup
+- [ ] Phase 1: Database Migration
+- [ ] Phase 2: Storage Migration
+- [ ] Phase 3: Authentication Migration
+- [ ] Phase 4: Lambda + API
+- [ ] Phase 5: Real-time Messaging
+- [ ] Phase 6: Deployment
+- [ ] Phase 7: Monitoring
+- [ ] Phase 8: Security
+- [ ] Phase 9: Cutover
+
+## Documentation
+
+- `QUICK-START.md` - Step-by-step deployment guide
+- `docs/PHASE-0-CHECKLIST.md` - Phase 0 checklist
+- `docs/database-schema-snapshot.md` - Current database schema
+- `/AWS-MIGRATION-PLAN.md` - Complete migration plan
+
+## Cost Estimates
+
+### Development (Free Tier)
+- RDS db.t4g.micro: FREE (750 hours/month)
+- Lambda: FREE (1M requests/month)
+- S3 + CloudFront: FREE (first year)
+- **Total: ~$0-5/month**
+
+### Production
+- RDS: ~$25/month
+- Lambda + API Gateway: ~$10/month
+- S3 + CloudFront: ~$10/month
+- Redis: ~$12/month
+- **Total: ~$60-80/month**
+
+## Security Notes
+
+- Never commit `.env.aws.local` or AWS credentials
+- Use IAM roles for Lambda functions (not access keys)
+- Enable MFA on AWS root account
+- Follow principle of least privilege for IAM policies
+- Enable CloudTrail for audit logging
 
 ## Troubleshooting
 
-### "VpcId not found"
-The database stack imports VPC ID from network stack. Make sure network stack is deployed first.
+### CDK Deploy Fails
 
-### "Secret not found"
-Database credentials are created with the database. Check Secrets Manager console.
+```bash
+# View detailed logs
+cdk deploy CommunityNetwork-dev --verbose
 
-### "Access Denied"
-Ensure your IAM user has sufficient permissions. Check CloudTrail for denied actions.
+# Check CloudFormation events
+aws cloudformation describe-stack-events --stack-name CommunityNetwork-dev
+```
 
-### RDS connection timeout
+### Can't Connect to RDS
+
 - Check security group allows your IP
-- Verify you're connecting to correct endpoint
-- Try from Lambda (inside VPC) instead of local machine
+- Verify database is "Available" in RDS console
+- Confirm correct endpoint and credentials
 
-## Next Steps
+### CDK Bootstrap Issues
 
-1. ✅ Infrastructure deployed
-2. 📍 **You are here** - Ready to migrate schema
-3. ⏳ Phase 1.2: Create database schema in RDS
-4. ⏳ Phase 1.3: Migrate data from Supabase
-5. ⏳ Phase 4: Deploy Lambda functions
+```bash
+cdk bootstrap aws://$CDK_DEFAULT_ACCOUNT/$CDK_DEFAULT_REGION --force
+```
 
-See `AWS-MIGRATION-PLAN.md` for detailed next steps.
+## Support
 
-## Resources
-
-- [AWS CDK Examples](https://github.com/aws-samples/aws-cdk-examples)
+- [AWS CDK Documentation](https://docs.aws.amazon.com/cdk/)
 - [AWS Free Tier](https://aws.amazon.com/free/)
-- [AWS Well-Architected](https://aws.amazon.com/architecture/well-architected/)
-- [AWS Solutions Library](https://aws.amazon.com/solutions/)
-- [r/aws Community](https://reddit.com/r/aws)
-
-## Questions?
-
-- Check `AWS-MIGRATION-PLAN.md` for detailed migration steps
-- Check `QUICK-START.md` for setup instructions
-- Search AWS documentation: https://docs.aws.amazon.com
-- Ask in project chat or open an issue
-
+- [r/aws on Reddit](https://reddit.com/r/aws)
