@@ -150,7 +150,6 @@ A friend-matching web application that connects users based on shared hobbies an
 - [ ] Design mobile-optimized chat interface
 - [ ] Implement sending and receiving text messages
 - [ ] Add real-time message updates
-- [ ] Create push notifications for new messages
 - [ ] Add conversation search/filtering
 - [ ] Implement message moderation/reporting
 - [ ] Add conversation archiving/deletion

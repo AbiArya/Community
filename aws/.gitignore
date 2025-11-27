@@ -1,0 +1,40 @@
+# CDK
+cdk/node_modules/
+cdk/cdk.out/
+cdk/*.js
+cdk/*.d.ts
+cdk/.cdk.staging/
+
+# Lambda
+lambdas/*/node_modules/
+lambdas/*/*.zip
+lambdas/*/dist/
+
+# Migrations
+migrations/node_modules/
+migrations/*.js
+migrations/data-exports/
+
+# Environment
+.env
+.env.aws
+.env.local
+.env.aws.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
