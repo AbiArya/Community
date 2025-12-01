@@ -15,26 +15,30 @@ export class NetworkStack extends cdk.Stack {
     super(scope, id, props);
 
     // Create VPC with public and private subnets
+    // For learning: Set natGateways to 0 to avoid $32/month cost
+    // For production: Set to 1 or 2 for private subnet internet access
     this.vpc = new ec2.Vpc(this, 'CommunityVpc', {
       ipAddresses: ec2.IpAddresses.cidr('10.0.0.0/16'),
       maxAzs: 2, // Use 2 availability zones for high availability
-      natGateways: 1, // 1 NAT gateway to save costs (use 2 for prod)
+      natGateways: 0, // 0 = $0/month (learning), 1 = $32/month (prod)
       subnetConfiguration: [
         {
           name: 'Public',
           subnetType: ec2.SubnetType.PUBLIC,
           cidrMask: 24,
         },
-        {
-          name: 'Private',
-          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-          cidrMask: 24,
-        },
-        {
-          name: 'Database',
-          subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
-          cidrMask: 24,
-        },
+        // Private subnets commented out for cost savings (no NAT = no internet for private subnets)
+        // Uncomment when you need RDS or private resources
+        // {
+        //   name: 'Private',
+        //   subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+        //   cidrMask: 24,
+        // },
+        // {
+        //   name: 'Database',
+        //   subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
+        //   cidrMask: 24,
+        // },
       ],
     });
 
