@@ -35,16 +35,23 @@ export class DatabaseStack extends cdk.Stack {
       },
     });
 
-    // Get security group from network stack
-    const dbSecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(
-      this,
-      'ImportedDbSG',
-      cdk.Fn.importValue('CommunityVpcId'), // You'll need to adjust this
-      { mutableSecurityRules: false }
+    // Create security group for RDS
+    const dbSecurityGroup = new ec2.SecurityGroup(this, 'DatabaseSecurityGroup', {
+      vpc,
+      description: 'Security group for Community Friends App database',
+      securityGroupName: `community-db-sg-${environment}`,
+    });
+
+    // Allow PostgreSQL access from within VPC
+    dbSecurityGroup.addIngressRule(
+      ec2.Peer.ipv4(vpc.vpcCidrBlock),
+      ec2.Port.tcp(5432),
+      'Allow PostgreSQL access from VPC'
     );
 
     // Create RDS PostgreSQL instance
     this.dbInstance = new rds.DatabaseInstance(this, 'CommunityDatabase', {
+      securityGroups: [dbSecurityGroup],
       engine: rds.DatabaseInstanceEngine.postgres({
         version: rds.PostgresEngineVersion.VER_15_3,
       }),
