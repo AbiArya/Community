@@ -82,7 +82,7 @@ export class StorageStack extends cdk.Stack {
     this.distribution = new cloudfront.Distribution(this, 'PhotoCDN', {
       comment: 'CDN for Community app photos',
       defaultBehavior: {
-        origin: new origins.S3Origin(this.photoBucket, {
+        origin: origins.S3BucketOrigin.withOriginAccessIdentity(this.photoBucket, {
           originAccessIdentity,
         }),
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
