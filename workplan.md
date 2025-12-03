@@ -4,24 +4,15 @@
 A friend-matching web application that connects users based on shared hobbies and interests. Users create profiles with photos, ranked hobbies, and descriptions, then receive 2 weekly matches of similar people to build their local community.
 
 ## Tech Stack
-- **Frontend**: Next.js 15 (App Router)
-- **Authentication**: Supabase Auth (Email magic link) → Migrating to AWS Cognito
-- **Database**: Supabase PostgreSQL → Migrating to AWS RDS PostgreSQL
-- **File Storage**: Supabase Storage → Migrating to AWS S3 + CloudFront
-- **Styling**: Tailwind CSS
-- **Deployment**: Vercel (keeping for now)
-- **Version Control**: Git/GitHub
+- **Frontend**: Next.js 15 (App Router), Tailwind CSS
+- **Backend**: Supabase (PostgreSQL + Auth + Realtime)
+- **Storage**: AWS S3 + CloudFront (photos)
+- **Compute**: AWS Lambda + EventBridge (weekly cron)
+- **Deployment**: Vercel
+- **Cost**: $0/month (free tiers)
 
-## AWS Migration Status
-📍 **Phase 0: Preparation** - 75% Complete (Awaiting AWS credentials)
-- Branch: `feature/aws-migration`
-- See: `AWS-MIGRATION-PLAN.md`, `aws/START-HERE.md`, `PHASE-0-STATUS.md`
-
-## Current Focus: UI Refresh & Theme Consistency
-- Prioritize fixing visual issues across existing flows before shipping new features.
-- Align every page with a cohesive color palette, typography scale, and spacing rhythm.
-- Leverage Tailwind tokens and reusable components to keep future work "on theme."
-- Use this UI pass to tighten responsiveness, accessibility, and perceived polish.
+## Current Focus: Phase 6.2 - Match Display UI
+The backend generates matches weekly (AWS Lambda). Now build the UI for users to see them!
 
 ## Development Phases
 
@@ -361,49 +352,33 @@ src/
 - **Messaging**: Real-time chat with matches (Hinge/Tinder-style inbox and conversation threads)
 - **Settings**: Granular control over matching preferences
 
-## Current Status: Phase 6.1 Complete ✅ - Ready for Phase 6.2
+## Current Status
 
-**Completed in Phase 6.1**:
-- [x] **Matching Algorithm** - Weighted similarity scoring (hobby 60%, location 30%, activity 10%)
-- [x] **Hobby Compatibility** - Rank-based scoring with shared hobby detection
-- [x] **Geographic Filtering** - PostGIS-powered distance calculations with exponential decay
-- [x] **Activity Scoring** - Recent activity rewards for better matching
-- [x] **Diversity Filter** - Prevents repetitive matches by penalizing recent pairs
-- [x] **Database Functions** - PostGIS functions for efficient candidate retrieval
-- [x] **Match Generation API** - Individual user match generation endpoint
-- [x] **Batch Processing API** - Weekly cron job for all users
-- [x] **Vercel Cron Setup** - Scheduled for every Monday at 3 AM UTC
-- [x] **Comprehensive Testing** - 27 passing unit tests for algorithm components
+### ✅ Completed (Phases 1-6.1)
+| Phase | Status |
+|-------|--------|
+| 1. Foundation & Setup | ✅ Complete |
+| 2. Authentication | ✅ Complete |
+| 3. Core Pages & Navigation | ✅ Complete |
+| 4. Profile Management | ✅ Complete |
+| 5. Settings & Account | ✅ Complete |
+| 6.1 Matching Algorithm | ✅ Complete |
 
-**Files Created**:
-- `src/lib/matching/algorithm.ts` - Core matching algorithm
-- `src/lib/matching/database.ts` - Database utilities for matching
-- `src/app/api/matches/generate/route.ts` - Individual match generation
-- `src/app/api/matches/batch-generate/route.ts` - Batch processing endpoint
-- `supabase/migrations/202411240001_create_matching_functions.sql` - PostGIS functions
-- `src/lib/matching/__tests__/algorithm.test.ts` - Comprehensive unit tests
-- `vercel.json` - Cron job configuration
+### 📍 Next Up: Phase 6.2 - Match Display UI
+- [ ] Design match cards interface
+- [ ] Create match history page  
+- [ ] Add match viewing tracking
+- [ ] Create match statistics dashboard
 
-**Completed in Phase 4 & 5**:
-- [x] Photos persisted to Supabase Storage and `user_photos` table
-- [x] Predefined hobbies seeded; selections persist to `user_hobbies`
-- [x] Profile view page built (displays user, photos, hobbies)
-- [x] Profile editing UI (bio, preferences, photo reorder, hobby re-rank)
-- [x] Unit tests for profile and settings components
-- [x] Account settings with phone number management
-- [x] Matching preferences (age range, distance)
-- [x] Account deletion functionality
-- [x] **UI Refresh & Theming complete** - unified design system across all pages
-- [x] **Design tokens documented** (colors, typography, spacing, shadows)
-- [x] **Reusable Tailwind utilities created** (buttons, cards, forms, alerts)
-- [x] **Style guide created** with practical component patterns
+### Then: Phase 6.3 - Messaging
+- [ ] Conversations/messages schema
+- [ ] Chat UI with Supabase Realtime
+- [ ] Read receipts, typing indicators
 
-**Next Phase: Phase 6.2 - Match Display & Interaction**
-- Match cards interface (view-only)
-- Match history page
-- Match viewing tracking
-- Simple contact display/connection
-- Match statistics dashboard
+### Infrastructure (see `AWS-MIGRATION-PLAN.md`)
+- **Photos:** AWS S3 + CloudFront
+- **Match Generation:** AWS Lambda (runs Mon 3AM UTC)
+- **Database/Auth:** Supabase
 
 ## Risk Assessment
 - **High Risk**: Matching algorithm accuracy and user satisfaction
@@ -417,5 +392,5 @@ src/
 - Average session duration > 5 minutes
 
 ---
-*Last Updated*: 2025-11-23
-*Status*: In Progress
+*Last Updated*: 2025-12-03
+*Status*: Phase 6.2 Ready - Match Display UI
