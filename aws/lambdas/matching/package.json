@@ -1,0 +1,24 @@
+{
+  "name": "@community/lambda-matching",
+  "version": "1.0.0",
+  "description": "Match generation Lambda function for Community App",
+  "main": "dist/generate-matches.js",
+  "types": "dist/generate-matches.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "package": "npm run build && cd dist && zip -r ../function.zip .",
+    "bundle": "npm run clean && npm install && npm run build && npm run zip-with-deps",
+    "zip-with-deps": "cd .. && zip -r matching/function.zip matching/dist matching/node_modules shared/dist -x '*.ts' -x '*.map'"
+  },
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.460.0",
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.131",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
+

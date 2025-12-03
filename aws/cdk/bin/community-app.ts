@@ -4,6 +4,7 @@ import * as cdk from 'aws-cdk-lib';
 import { NetworkStack } from '../lib/network-stack';
 import { DatabaseStack } from '../lib/database-stack';
 import { StorageStack } from '../lib/storage-stack';
+import { MatchingStack } from '../lib/matching-stack';
 
 const app = new cdk.App();
 
@@ -24,12 +25,13 @@ const tags = {
 // ============================================================
 // COST-FREE LEARNING SETUP
 // ============================================================
-// For learning: Deploy Network + Storage only ($0/month)
+// For learning: Deploy Network + Storage + Matching ($0/month)
 // Skip: Database (use Supabase instead)
 //
 // Deploy order:
 //   1. cdk deploy CommunityNetwork-dev   (~2 min, $0)
 //   2. cdk deploy CommunityStorage-dev   (~5 min, $0)
+//   3. cdk deploy CommunityMatching-dev  (~2 min, $0)
 //
 // Skip for now:
 //   - CommunityDatabase-dev  (~$15/month after free tier)
@@ -62,11 +64,20 @@ const storageStack = new StorageStack(app, `CommunityStorage-${environment}`, {
   environment,
 });
 
+// Matching Stack (Lambda + EventBridge)
+// Cost: $0 (free tier: 1M Lambda requests, 14M EventBridge invocations)
+const matchingStack = new MatchingStack(app, `CommunityMatching-${environment}`, {
+  env,
+  description: 'Lambda function for weekly match generation with EventBridge cron',
+  environment,
+});
+
 // Apply tags to all stacks
 Object.entries(tags).forEach(([key, value]) => {
   cdk.Tags.of(networkStack).add(key, value);
   cdk.Tags.of(databaseStack).add(key, value);
   cdk.Tags.of(storageStack).add(key, value);
+  cdk.Tags.of(matchingStack).add(key, value);
 });
 
 app.synth();
