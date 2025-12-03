@@ -1,0 +1,20 @@
+{
+  "name": "@community/lambda-shared",
+  "version": "1.0.0",
+  "description": "Shared utilities for Community App Lambda functions",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.460.0",
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
+

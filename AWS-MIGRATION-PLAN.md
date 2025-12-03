@@ -12,7 +12,7 @@ Phase 0: Preparation       [█████████████████�
 Phase 1: Database (RDS)    [░░░░░░░░░░░░░░░░░░░░░░░░░░░░] SKIPPED (using Supabase)
 Phase 2: Storage (S3)      [████████████████████████████] 100% ✅ COMPLETE
 Phase 3: Auth (Cognito)    [░░░░░░░░░░░░░░░░░░░░░░░░░░░░] SKIPPED (using Supabase Auth)
-Phase 4: Lambda + API      [░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%   ← NEXT UP
+Phase 4: Lambda + API      [████████████████████████████] 100% ✅ COMPLETE
 Phase 5: Messaging (Redis) [░░░░░░░░░░░░░░░░░░░░░░░░░░░░] Future
 Phase 6: Deployment        [░░░░░░░░░░░░░░░░░░░░░░░░░░░░] Future
 Phase 7: Monitoring        [░░░░░░░░░░░░░░░░░░░░░░░░░░░░] Future
@@ -20,8 +20,8 @@ Phase 8: Security          [░░░░░░░░░░░░░░░░░�
 Phase 9: Cutover           [░░░░░░░░░░░░░░░░░░░░░░░░░░░░] Future
 ```
 
-**Current Status:** Phase 2 COMPLETE - Ready for Phase 4 (Lambda Functions)
-**Next Action:** Create Lambda for match generation with EventBridge cron
+**Current Status:** Phase 4 COMPLETE - Lambda + EventBridge deployed and tested
+**Next Action:** Phase 5 (Messaging with Redis) or Phase 7 (Monitoring)
 
 ### 🎯 Hybrid Approach (Zero Cost Learning)
 We're keeping **Supabase for database and auth** while learning AWS with:
@@ -406,94 +406,90 @@ AWS_COGNITO_REGION=us-east-1
 
 ---
 
-### Phase 4: API Routes to Lambda 🚀 📍 NEXT UP
+### Phase 4: API Routes to Lambda 🚀 ✅ COMPLETE
 **Timeline:** Week 6-7  
 **Risk:** Medium  
 **Dependencies:** Phase 2 ✅  
-**Status:** 📍 Ready to start after Phase 2 integration
+**Status:** ✅ Complete (December 3, 2025)
 **Can Rollback:** Yes
 
 > **Note:** Since we're keeping Supabase for database, Lambda functions will 
 > connect to Supabase instead of RDS. This simplifies the implementation!
 
-#### 4.1: Lambda Functions Infrastructure
-- [ ] Create Lambda execution role with permissions:
-  - RDS access (via VPC)
-  - DynamoDB access
-  - CloudWatch Logs
-  - Secrets Manager
-- [ ] Set up Lambda Layer for shared dependencies:
-  - `pg` (PostgreSQL client)
-  - JWT verification
-  - Common utilities
-- [ ] Configure VPC for Lambda (to access RDS)
+#### 4.1: Lambda Functions Infrastructure ✅ COMPLETE
+- [x] Create Lambda execution role with permissions:
+  - CloudWatch Logs ✅
+  - Secrets Manager ✅
+- [x] NodejsFunction bundles dependencies automatically with esbuild
+- [x] Created shared Supabase client with Secrets Manager integration
 
-#### 4.2: Migrate Match Generation API
-**Current:** `src/app/api/matches/generate/route.ts` (Next.js API route)  
+**Files created:**
+- `aws/lambdas/shared/supabase-client.ts` - Shared Supabase client with Secrets Manager
+- `aws/lambdas/shared/package.json` - Shared dependencies
+- `aws/lambdas/shared/tsconfig.json` - TypeScript config
+
+#### 4.2: Migrate Match Generation API ✅ COMPLETE
+**Current:** `src/app/api/matches/batch-generate/route.ts` (Next.js API route)  
 **Target:** Lambda function triggered by EventBridge
 
-- [ ] Create `aws/lambdas/matching/generate-matches.ts`
-- [ ] Copy logic from `src/lib/matching/algorithm.ts` (no changes needed!)
-- [ ] Update database calls to use AWS RDS client
-- [ ] Package Lambda: `cd aws/lambdas/matching && npm install && zip -r function.zip .`
-- [ ] Deploy Lambda function
-- [ ] Create EventBridge rule for cron:
-  ```
-  Schedule: cron(0 3 ? * MON *)  # Every Monday at 3 AM UTC
-  Target: generate-matches Lambda
-  ```
+- [x] Create `aws/lambdas/matching/generate-matches.ts`
+- [x] Port logic from `src/lib/matching/algorithm.ts` and `database.ts`
+- [x] Update database calls to use Supabase via Secrets Manager
+- [x] Create EventBridge rule for cron (every Monday 3 AM UTC)
+- [x] Create CDK stack with NodejsFunction (auto-bundles TypeScript)
 
-**Files to create:**
-- `aws/lambdas/matching/generate-matches.ts`
-- `aws/lambdas/matching/package.json`
-- `aws/cdk/lib/matching-stack.ts`
+**Files created:**
+- `aws/lambdas/matching/generate-matches.ts` - Lambda handler with matching logic
+- `aws/lambdas/matching/package.json` - Lambda dependencies
+- `aws/lambdas/matching/tsconfig.json` - TypeScript config
+- `aws/cdk/lib/matching-stack.ts` - CDK stack for Lambda + EventBridge
 
-#### 4.3: API Gateway for HTTP Endpoints
+#### 4.3: Deploy Lambda Stack ✅ COMPLETE
+**Deployed December 3, 2025**
+
+**Deployed Resources:**
+| Resource | ID |
+|----------|-----|
+| Lambda Function | `community-match-generation-dev` |
+| EventBridge Rule | `community-weekly-match-generation-dev` |
+| Schedule | `cron(0 3 ? * MON *)` - Every Monday 3 AM UTC |
+| CloudWatch Logs | `/aws/lambda/community-match-generation-dev` |
+| Supabase Secret | `community-app/supabase-dev` |
+
+**Deployment checklist:**
+- [x] Create Supabase secret in Secrets Manager ✅
+- [x] Deploy `CommunityMatching-dev` stack ✅
+- [x] Test Lambda with manual invocation ✅ (2 users, 1 match generated)
+- [x] Verify EventBridge rule created ✅
+- [x] Monitor CloudWatch logs ✅
+
+**Test Results:**
+```json
+{
+  "week": "2025-W49",
+  "totalUsersProcessed": 2,
+  "totalMatchesGenerated": 1,
+  "successfulUsers": 2,
+  "failedUsers": 0,
+  "durationMs": 2865
+}
+```
+
+#### 4.4: API Gateway for HTTP Endpoints (Optional - Future)
 - [ ] Create REST API or HTTP API in API Gateway
-- [ ] Set up routes:
-  - `POST /api/matches/generate` → Lambda
-  - `POST /api/matches/batch-generate` → Lambda
-  - `POST /api/seed-hobbies` → Lambda
+- [ ] Set up routes for manual trigger
 - [ ] Configure CORS
-- [ ] Add Cognito authorizer
-- [ ] Set up custom domain (optional)
 
-**CDK Stack:**
-```typescript
-// aws/cdk/lib/api-stack.ts
-const api = new apigateway.RestApi(this, 'CommunityAPI', {
-  restApiName: 'Community Friends API',
-  defaultCorsPreflightOptions: {/* ... */}
-});
-
-const matchesResource = api.root.addResource('matches');
-matchesResource.addMethod('POST', new apigateway.LambdaIntegration(matchLambda), {
-  authorizer: new apigateway.CognitoUserPoolsAuthorizer(this, 'Authorizer', {
-    cognitoUserPools: [userPool]
-  })
-});
-```
-
-#### 4.4: Update Next.js API Routes
-- [ ] Update `src/app/api/matches/generate/route.ts`
-  - Forward to API Gateway instead of direct DB call
-  - Or delete and call directly from frontend
-- [ ] Update `src/app/api/matches/batch-generate/route.ts`
-- [ ] Update `src/app/api/seed-hobbies/route.ts`
-
-**Alternative Approach:** Remove API routes entirely, call API Gateway directly from client
-
-**Environment Variables:**
-```bash
-AWS_API_GATEWAY_URL=https://xxxxx.execute-api.us-east-1.amazonaws.com/prod
-```
+> **Note:** API Gateway is optional for Phase 4. The Lambda is primarily 
+> triggered by EventBridge cron. The existing Next.js API routes continue 
+> to work for manual triggers during development.
 
 **Validation:**
-- [ ] Can trigger match generation manually
-- [ ] Weekly cron runs successfully
-- [ ] Matches are created in RDS
-- [ ] Lambda logs appear in CloudWatch
-- [ ] API Gateway returns correct responses
+- [x] Can trigger match generation manually via Lambda invoke ✅
+- [x] Weekly cron configured (every Monday 3 AM UTC) ✅
+- [x] Matches are created in Supabase ✅
+- [x] Lambda logs appear in CloudWatch ✅
+- [x] Secrets Manager integration working ✅
 
 ---
 
@@ -892,24 +888,28 @@ const profiles = await db.query(
 ```
 aws/
 ├── cdk/
-│   ├── bin/community-app.ts          ✅ Created
+│   ├── bin/community-app.ts          ✅ Created (updated for Phase 4)
 │   ├── lib/
 │   │   ├── network-stack.ts          ✅ Created
 │   │   ├── storage-stack.ts          ✅ Created
+│   │   ├── matching-stack.ts         ✅ Created (Phase 4 - Lambda + EventBridge)
 │   │   ├── database-stack.ts         (skipped - using Supabase)
 │   │   ├── auth-stack.ts             (skipped - using Supabase Auth)
-│   │   ├── api-stack.ts              (Phase 4)
+│   │   ├── api-stack.ts              (Future - optional API Gateway)
 │   │   ├── messaging-stack.ts        (Phase 5)
 │   │   └── monitoring-stack.ts       (Phase 7)
 │   ├── cdk.json                      ✅ Created
 │   └── package.json                  ✅ Created
 ├── lambdas/
 │   ├── shared/
-│   │   ├── authorization.ts          (Phase 8)
-│   │   └── database.ts               (Phase 4)
+│   │   ├── supabase-client.ts        ✅ Created (Phase 4 - Secrets Manager integration)
+│   │   ├── package.json              ✅ Created (Phase 4)
+│   │   ├── tsconfig.json             ✅ Created (Phase 4)
+│   │   └── authorization.ts          (Phase 8)
 │   ├── matching/
-│   │   ├── generate-matches.ts       (Phase 4 - next up)
-│   │   └── package.json              (Phase 4)
+│   │   ├── generate-matches.ts       ✅ Created (Phase 4 - complete matching logic)
+│   │   ├── package.json              ✅ Created (Phase 4)
+│   │   └── tsconfig.json             ✅ Created (Phase 4)
 │   ├── auth/                         (skipped - using Supabase Auth)
 │   ├── websocket/                    (Phase 5)
 │   └── image-processor/              (optional enhancement)
@@ -1093,6 +1093,9 @@ npm list @aws-sdk/client-s3  # Check installation
 | VPC | `vpc-0c45aa7745bbe6095` |
 | S3 Bucket | `community-app-photos-dev-879381267216` |
 | CloudFront | `https://d2rld0uk0j0fpj.cloudfront.net` |
+| Lambda Function | `community-match-generation-dev` |
+| EventBridge Rule | `community-weekly-match-generation-dev` |
+| Supabase Secret | `community-app/supabase-dev` |
 
 ### 🧪 S3 Storage Configuration
 
@@ -1107,26 +1110,42 @@ AWS_PROFILE=community-app
 
 **S3 storage is now the default for all photo uploads.**
 
-### 🎯 Next Actions (Phase 4: Lambda Functions)
+### 🎯 Phase 4 Complete - Useful Commands
 
-**1. Create Lambda for Match Generation**
+**Invoke Lambda Manually:**
 ```bash
-# Create aws/lambdas/matching/generate-matches.ts
-# Copy logic from src/lib/matching/algorithm.ts
-# Connect to Supabase (not RDS)
+aws lambda invoke \
+  --function-name community-match-generation-dev \
+  --profile community-app \
+  output.json && cat output.json
 ```
 
-**2. Set Up EventBridge Cron**
+**View Lambda Logs:**
 ```bash
-# Create CDK stack for Lambda + EventBridge
-# Schedule: cron(0 3 ? * MON *)  # Every Monday 3 AM UTC
+aws logs tail /aws/lambda/community-match-generation-dev \
+  --profile community-app --follow
 ```
 
-**3. Create API Gateway (optional)**
+**Check EventBridge Schedule:**
 ```bash
-# Expose Lambda via HTTP endpoint
-# For manual trigger/testing
+aws events describe-rule \
+  --name community-weekly-match-generation-dev \
+  --profile community-app
 ```
+
+**Update Supabase Secret (if needed):**
+```bash
+aws secretsmanager update-secret \
+  --secret-id community-app/supabase-dev \
+  --secret-string '{"SUPABASE_URL":"new-url","SUPABASE_SERVICE_ROLE_KEY":"new-key"}' \
+  --profile community-app
+```
+
+### 🔜 Next Phase Options
+
+1. **Phase 5: Real-Time Messaging** - ElastiCache Redis + WebSockets (~$12/month)
+2. **Phase 7: Monitoring** - CloudWatch dashboards and alarms ($0 free tier)
+3. Continue with **Phase 6.2 of workplan** - Match Display UI
 
 ### Hybrid Architecture (Current)
 
@@ -1139,13 +1158,14 @@ AWS_PROFILE=community-app
 │  │   Vercel    │         │        AWS ($0/month)       │   │
 │  │  (Next.js)  │         │                             │   │
 │  │             │────────▶│  S3 + CloudFront (photos) ✅│   │
-│  │  API Routes │         │  Lambda (cron jobs) [TODO]  │   │
+│  │  API Routes │         │                             │   │
 │  │  • /api/photos/presigned-url                        │   │
-│  │  • /api/photos/delete                               │   │
+│  │  • /api/photos/delete │  Lambda + EventBridge      │   │
+│  │  • /api/matches/*     │  (weekly cron) [READY]  ✅ │   │
 │  └─────────────┘         └─────────────────────────────┘   │
-│         │                         │                         │
-│         │                         │ photos served           │
-│         ▼                         ▼                         │
+│         │                         │         │               │
+│         │                         │ photos  │ matches       │
+│         ▼                         ▼         ▼               │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │              Supabase (Free Tier)                   │   │
 │  │                                                     │   │
@@ -1153,6 +1173,7 @@ AWS_PROFILE=community-app
 │  │  • Auth with Magic Links                            │   │
 │  │  • Row Level Security                               │   │
 │  │  • user_photos table (stores S3 keys + URLs)        │   │
+│  │  • matches table (Lambda writes here weekly)        │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
