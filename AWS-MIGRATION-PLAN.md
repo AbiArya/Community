@@ -1,103 +1,119 @@
 # AWS Migration Action Plan
-## From Supabase to AWS - Complete Migration
+## From Supabase to AWS - Hybrid Migration
 
-**Status:** 📝 Planning Complete → Ready to Execute
+**Status:** 🚀 In Progress - Phase 2 (Storage Integration)
 
 ---
 
 ## ✅ Migration Progress
 
 ```
-Phase 0: Preparation       [▓▓▓░] 75% Complete  ← CURRENT PHASE
-Phase 1: Database (RDS)    [ ] Not Started      ← NEXT
-Phase 2: Storage (S3)      [ ] Not Started
-Phase 3: Auth (Cognito)    [ ] Not Started
-Phase 4: Lambda + API      [ ] Not Started
-Phase 5: Messaging (Redis) [ ] Not Started
-Phase 6: Deployment        [ ] Not Started
-Phase 7: Monitoring        [ ] Not Started
-Phase 8: Security          [ ] Not Started
-Phase 9: Cutover           [ ] Not Started
+Phase 0: Preparation       [████████████████████████████] 100% ✅ COMPLETE
+Phase 1: Database (RDS)    [░░░░░░░░░░░░░░░░░░░░░░░░░░░░] SKIPPED (using Supabase)
+Phase 2: Storage (S3)      [██████████████░░░░░░░░░░░░░░] 50%  ← CURRENT (integration pending)
+Phase 3: Auth (Cognito)    [░░░░░░░░░░░░░░░░░░░░░░░░░░░░] SKIPPED (using Supabase Auth)
+Phase 4: Lambda + API      [░░░░░░░░░░░░░░░░░░░░░░░░░░░░] Next up
+Phase 5: Messaging (Redis) [░░░░░░░░░░░░░░░░░░░░░░░░░░░░] Future
+Phase 6: Deployment        [░░░░░░░░░░░░░░░░░░░░░░░░░░░░] Future
+Phase 7: Monitoring        [░░░░░░░░░░░░░░░░░░░░░░░░░░░░] Future
+Phase 8: Security          [░░░░░░░░░░░░░░░░░░░░░░░░░░░░] Future
+Phase 9: Cutover           [░░░░░░░░░░░░░░░░░░░░░░░░░░░░] Future
 ```
 
-**Current Status:** Phase 0 - Awaiting AWS credentials configuration
-**Next Action:** User must create AWS account/IAM user, then run setup script
+**Current Status:** Phase 2 - S3/CloudFront deployed, need to integrate with app
+**Next Action:** Create `src/lib/aws/storage.ts` and update photo components
+
+### 🎯 Hybrid Approach (Zero Cost Learning)
+We're keeping **Supabase for database and auth** while learning AWS with:
+- ✅ VPC networking (deployed)
+- ✅ S3 + CloudFront for photos (deployed, integration pending)
+- 🔜 Lambda for serverless functions
+- 🔜 EventBridge for cron jobs
+
+**Monthly Cost:** $0 (free tier)
 
 ---
 
 ## 📋 Executive Summary
 
-This plan migrates your friend-matching app from Supabase to AWS infrastructure. The migration follows a **staged, testable approach** where each phase can be validated before proceeding.
+This plan migrates your friend-matching app from Supabase to AWS infrastructure using a **hybrid approach** - keeping Supabase for database/auth while learning AWS services.
 
-**Current Supabase Usage:**
-- PostgreSQL Database (with PostGIS extension)
-- Email Magic Link Authentication
-- Row Level Security (RLS) policies
-- Stored database functions (PostGIS queries)
-- Planned: Real-time messaging (Phase 6.3)
-- Planned: File storage for photos
+**Current Setup (Keeping):**
+- ✅ PostgreSQL Database (Supabase - free tier)
+- ✅ Email Magic Link Authentication (Supabase Auth)
+- ✅ Row Level Security (RLS) policies
+- ✅ Stored database functions (PostGIS queries)
 
-**Target AWS Architecture:**
+**AWS Services (Deployed/Learning):**
+- ✅ VPC networking (deployed)
+- ✅ S3 + CloudFront for photo storage (deployed, integration pending)
+- 🔜 Lambda for serverless compute
+- 🔜 EventBridge for cron jobs
+- 🔜 CloudWatch for monitoring
+
+**Future (Full Migration - When Ready):**
 - RDS PostgreSQL with PostGIS
 - Cognito for authentication
-- S3 + CloudFront for photo storage
-- Lambda for serverless compute
 - ElastiCache Redis + WebSockets for real-time messaging
-- EventBridge for cron jobs
-- CloudWatch for monitoring
 
 ---
 
 ## 🎯 Migration Phases
 
-### Phase 0: Preparation & Setup 🟡 75% Complete
+### Phase 0: Preparation & Setup ✅ COMPLETE
 **Timeline:** Week 1  
 **Risk:** Low  
-**Can Rollback:** Yes
+**Status:** ✅ Complete (December 3, 2025)
 
-#### 0.1: AWS Account Setup
-- [ ] Create AWS account (or use existing) ⏳ USER ACTION REQUIRED
-- [ ] Set up billing alerts ⏳ USER ACTION REQUIRED
-- [ ] Create IAM admin user (not root) ⏳ USER ACTION REQUIRED
+#### 0.1: AWS Account Setup ✅
+- [x] Create AWS account
+- [x] Set up billing alerts
+- [x] Create IAM admin user (not root)
 - [x] Install AWS CLI v2 ✅ v2.28.23
-- [ ] Configure AWS CLI with profile: `aws configure --profile community-app` ⏳ USER ACTION
-- [x] Install AWS CDK: `npm install -g aws-cdk` ✅ v2.1033.0
+- [x] Configure AWS CLI with profile: `aws configure --profile community-app`
+- [x] Install AWS CDK ✅ v2.1033.0
+- [x] Bootstrap CDK in AWS account
 
-#### 0.2: Environment & Repository Setup ✅ COMPLETE
-- [x] Create `env.aws.template` for AWS credentials (don't commit!)
+#### 0.2: Environment & Repository Setup ✅
+- [x] Create `env.aws.template` for AWS credentials
 - [x] Update `.gitignore` to include AWS-specific files
-- [x] Create `aws/` directory structure:
-  ```
-  aws/
-  ├── cdk/              # Infrastructure as Code ✅
-  ├── lambdas/          # Lambda function code ✅
-  ├── migrations/       # Database migration scripts ✅
-  ├── scripts/          # Setup scripts ✅
-  └── docs/            # Architecture diagrams ✅
-  ```
+- [x] Create `aws/` directory structure
 - [x] Document current database schema snapshot
-- [ ] Export current Supabase data (backup) ⏳ Will do before Phase 9
 
-#### 0.3: Development Strategy ✅ COMPLETE
+#### 0.3: Development Strategy ✅
 - [x] Create git branch: `feature/aws-migration`
-- [x] Set up AWS region (recommend: `us-east-1` or `us-west-2`)
-- [x] Plan dual-environment strategy (Supabase stays live during migration)
-- [x] Create migration testing checklist
-- [x] Create automated setup script
+- [x] Set up AWS region: `us-east-1`
+- [x] Plan dual-environment strategy (Supabase stays live)
+- [x] Implement zero-cost mode for development
 
-**Validation:** ⏳ Pending AWS credentials
-- [ ] Can authenticate to AWS CLI
-- [ ] CDK bootstrap complete
-- [ ] Can synthesize CloudFormation templates
-- [x] Git branch created and clean ✅
+#### 0.4: Initial Deployments ✅
+- [x] Deploy `CommunityNetwork-dev` (VPC, subnets, security groups)
+- [x] Deploy `CommunityStorage-dev` (S3 bucket, CloudFront CDN)
+
+**Deployed Resources:**
+- VPC: `vpc-0c45aa7745bbe6095`
+- S3 Bucket: `community-app-photos-dev-879381267216`
+- CloudFront: `d2rld0uk0j0fpj.cloudfront.net`
+
+**Validation:** ✅ All passing
+- [x] Can authenticate to AWS CLI
+- [x] CDK bootstrap complete
+- [x] CloudFormation stacks deployed successfully
+- [x] S3 upload/download working
+- [x] CloudFront serving content
 
 ---
 
-### Phase 1: Database Migration 🗄️
+### Phase 1: Database Migration 🗄️ ⏭️ SKIPPED
 **Timeline:** Week 2-3  
 **Risk:** Medium  
-**Dependencies:** Phase 0  
-**Can Rollback:** Yes (Supabase still running)
+**Status:** ⏭️ SKIPPED - Continuing to use Supabase PostgreSQL
+
+> **Decision:** We're keeping Supabase for the database to minimize costs during learning.
+> This can be revisited later when ready for full AWS migration.
+> 
+> **Current Setup:** Supabase PostgreSQL with PostGIS (free tier)
+> **Monthly Cost Savings:** ~$15/month by skipping RDS
 
 #### 1.1: Set Up RDS PostgreSQL
 - [ ] Create VPC with public/private subnets
@@ -175,22 +191,22 @@ AWS_RDS_SECRET_ARN=arn:aws:secretsmanager:...
 
 ---
 
-### Phase 2: Storage Migration (S3) 📁
+### Phase 2: Storage Migration (S3) 📁 🟡 IN PROGRESS
 **Timeline:** Week 3-4  
 **Risk:** Low  
-**Dependencies:** Phase 0  
-**Can Rollback:** Yes
+**Dependencies:** Phase 0 ✅  
+**Status:** 🟡 Infrastructure deployed, app integration pending
 
-#### 2.1: S3 Bucket Setup
-- [ ] Create S3 bucket: `community-app-photos-{env}`
-- [ ] Enable versioning (production)
-- [ ] Configure bucket policy (private by default)
-- [ ] Set up lifecycle rules (optional: transition to S3-IA after 90 days)
-- [ ] Create CloudFront distribution for photos
-  - Origin: S3 bucket
-  - Cache policy: Optimize for images
-  - SSL certificate (use ACM)
-- [ ] Configure CORS for browser uploads
+#### 2.1: S3 Bucket Setup ✅ COMPLETE
+- [x] Create S3 bucket: `community-app-photos-dev-879381267216`
+- [x] Configure bucket policy (private by default)
+- [x] Set up lifecycle rules
+- [x] Create CloudFront distribution: `d2rld0uk0j0fpj.cloudfront.net`
+  - Origin: S3 bucket with OAI
+  - Cache policy: Optimized for images
+  - HTTPS enabled
+- [x] Configure CORS for browser uploads
+- [x] Test upload working via CLI
 
 **CDK Stack:**
 ```typescript
@@ -242,8 +258,10 @@ const distribution = new cloudfront.Distribution(this, 'PhotoCDN', {
 
 **Environment Variables:**
 ```bash
-AWS_S3_PHOTOS_BUCKET=community-app-photos-dev
-AWS_CLOUDFRONT_DOMAIN=d1234567890.cloudfront.net
+# Add to .env.local
+AWS_S3_PHOTOS_BUCKET=community-app-photos-dev-879381267216
+AWS_CLOUDFRONT_DOMAIN=d2rld0uk0j0fpj.cloudfront.net
+AWS_REGION=us-east-1
 ```
 
 **Validation:**
@@ -255,11 +273,16 @@ AWS_CLOUDFRONT_DOMAIN=d1234567890.cloudfront.net
 
 ---
 
-### Phase 3: Authentication Migration (Cognito) 🔐
+### Phase 3: Authentication Migration (Cognito) 🔐 ⏭️ SKIPPED
 **Timeline:** Week 4-6  
 **Risk:** HIGH ⚠️  
-**Dependencies:** Phase 1  
-**Can Rollback:** Complex (requires dual-auth strategy)
+**Status:** ⏭️ SKIPPED - Continuing to use Supabase Auth
+
+> **Decision:** We're keeping Supabase Auth to minimize complexity during learning.
+> Magic link auth works well with Supabase. Cognito doesn't support magic links natively.
+> 
+> **Current Setup:** Supabase Auth with email magic links (free tier)
+> **Complexity Savings:** Avoiding custom Lambda auth implementation
 
 #### 3.1: Cognito Setup
 - [ ] Create Cognito User Pool
@@ -380,11 +403,15 @@ AWS_COGNITO_REGION=us-east-1
 
 ---
 
-### Phase 4: API Routes to Lambda 🚀
+### Phase 4: API Routes to Lambda 🚀 📍 NEXT UP
 **Timeline:** Week 6-7  
 **Risk:** Medium  
-**Dependencies:** Phase 1, Phase 3  
+**Dependencies:** Phase 2 ✅  
+**Status:** 📍 Ready to start after Phase 2 integration
 **Can Rollback:** Yes
+
+> **Note:** Since we're keeping Supabase for database, Lambda functions will 
+> connect to Supabase instead of RDS. This simplifies the implementation!
 
 #### 4.1: Lambda Functions Infrastructure
 - [ ] Create Lambda execution role with permissions:
@@ -1040,74 +1067,87 @@ Compare to:
 
 ---
 
-## 🚀 Quick Start Guide
+## 🚀 Quick Start - Current State
 
-### First Steps (Do This First!)
+### ✅ Already Completed
 
-1. **Create AWS Account** → https://aws.amazon.com
-   - Enable MFA on root account
-   - Set billing alerts ($10, $50, $100)
+```bash
+# AWS Account & CLI configured ✅
+aws sts get-caller-identity --profile community-app
 
-2. **Install Tools**
-   ```bash
-   # AWS CLI already installed ✅
-   npm install -g aws-cdk
-   cdk --version
-   ```
+# CDK bootstrapped ✅
+# Git branch created ✅
+git branch --show-current  # feature/aws-migration
 
-3. **Configure AWS**
-   ```bash
-   aws configure --profile community-app
-   # Enter: Access Key, Secret Key, Region (us-east-1), Format (json)
-   export AWS_PROFILE=community-app
-   ```
+# Infrastructure deployed ✅
+aws cloudformation list-stacks --query "Stacks[?contains(StackName,'Community')]"
+```
 
-4. **Create Branch**
-   ```bash
-   git checkout -b feature/aws-migration
-   ```
+### 📦 Deployed Resources
 
-5. **Bootstrap CDK** (one-time)
-   ```bash
-   cdk bootstrap aws://ACCOUNT-ID/us-east-1
-   ```
+| Resource | ID/URL |
+|----------|--------|
+| VPC | `vpc-0c45aa7745bbe6095` |
+| S3 Bucket | `community-app-photos-dev-879381267216` |
+| CloudFront | `https://d2rld0uk0j0fpj.cloudfront.net` |
 
-### Recommended Migration Order
+### 🎯 Next Actions (In Order)
 
-**Phase 1: Database** (Start Here)
-- Set up RDS PostgreSQL with PostGIS
-- Migrate schema and data
-- Create connection utilities
+**1. Complete Phase 2: S3 Integration**
+```bash
+# Install AWS SDK
+npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner
 
-**Phase 2: Storage** (Easy Win)
-- S3 bucket for photos
-- CloudFront CDN
-- Update photo upload components
+# Create src/lib/aws/storage.ts
+# Update PhotoUpload.tsx to use S3
+# Update PhotoManagement.tsx for S3 delete
+# Test photo upload/display
+```
 
-**Phase 4: Lambda + EventBridge** (Fun Part)
-- Move match generation to Lambda
-- Set up weekly cron
-- Learn serverless
+**2. Start Phase 4: Lambda Functions**
+```bash
+# Create Lambda for match generation
+# Set up EventBridge cron
+# Connect Lambda to Supabase (not RDS)
+```
 
-**Phase 3: Auth** (Most Complex)
-- Cognito setup
-- Custom magic link auth
-- User migration
+### Hybrid Architecture (Current)
 
-**Phase 5: Real-time Messaging** (Advanced)
-- ElastiCache Redis
-- WebSocket API
-- Pub/Sub architecture
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Community Friends App                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────┐         ┌─────────────────────────────┐   │
+│  │   Vercel    │         │        AWS ($0/month)       │   │
+│  │  (Next.js)  │         │                             │   │
+│  │             │────────▶│  S3 + CloudFront (photos)   │   │
+│  └─────────────┘         │  Lambda (cron jobs) [TODO]  │   │
+│         │                └─────────────────────────────┘   │
+│         │                                                   │
+│         ▼                                                   │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │              Supabase (Free Tier)                   │   │
+│  │                                                     │   │
+│  │  • PostgreSQL + PostGIS (database)                  │   │
+│  │  • Auth with Magic Links                            │   │
+│  │  • Row Level Security                               │   │
+│  │  • Realtime (for messaging later)                   │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## 🎯 Key Architecture Decisions
 
-1. **Messaging:** Redis Pub/Sub + WebSockets (not AppSync)
-2. **Cron:** EventBridge (triggers Lambda weekly)
-3. **Auth:** Cognito + Custom Lambda for magic links
-4. **Repo:** Mono-repo (everything stays together)
-5. **Deployment:** Keep on Vercel initially, migrate later
+1. **Database:** Supabase PostgreSQL (keeping for now, $0)
+2. **Auth:** Supabase Auth with magic links (keeping, $0)
+3. **Photo Storage:** AWS S3 + CloudFront (deployed, $0)
+4. **Cron Jobs:** AWS Lambda + EventBridge (next up, $0)
+5. **Deployment:** Vercel for Next.js (keeping)
+6. **Full AWS Migration:** Future phase when ready
 
 ---
 
