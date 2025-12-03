@@ -7,6 +7,7 @@ import { useAuthSession } from "@/hooks/useAuthSession";
 import { PhotoManagement, type PendingPhoto, type PhotoOperation } from "./PhotoManagement";
 import { HobbyManagement } from "./HobbyManagement";
 import { validateAndNormalizeZipcode, zipcodeToLocation, isValidZipcode } from "@/lib/utils/zipcode";
+import { uploadPhotoToS3, deletePhotosFromS3 } from "@/lib/aws/storage-client";
 
 interface ProfileEditProps {
   onSaveSuccess?: () => void;
@@ -251,23 +252,21 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
     const existingPhotos = localPhotos.filter((p): p is UserPhoto => !('file' in p));
     const pendingPhotos = localPhotos.filter((p): p is PendingPhoto => 'file' in p);
 
-    // Step 1: Batch delete from storage
+    // Step 1: Delete photos from S3 storage
     if (photosToDelete.length > 0) {
       const storagePaths = photosToDelete
         .map(p => p.storagePath)
         .filter((path): path is string => !!path);
       
       if (storagePaths.length > 0) {
-        const { error: storageError } = await supabase.storage
-          .from('user-photos')
-          .remove(storagePaths);
-          
-        if (storageError) {
-          console.warn('Failed to delete from storage:', storageError);
+        try {
+          await deletePhotosFromS3(storagePaths, session.access_token);
+        } catch (err) {
+          console.warn('Failed to delete from S3:', err);
         }
       }
       
-      // Batch delete from database
+      // Delete from database
       const idsToDelete = photosToDelete.map(p => p.id);
       const { error: deleteError } = await supabase
         .from("user_photos")
@@ -279,7 +278,7 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
       }
     }
 
-    // Step 2: Upload new photos to storage first
+    // Step 2: Upload new photos to S3
     const uploadedPhotos: Array<{
       user_id: string;
       photo_url: string;
@@ -289,25 +288,12 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
     }> = [];
 
     for (const pending of pendingPhotos) {
-      const fileExt = pending.file.name.split('.').pop();
-      const storagePath = `${session.user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('user-photos')
-        .upload(storagePath, pending.file);
-        
-      if (uploadError) {
-        throw new Error(`Failed to upload photo: ${uploadError.message}`);
-      }
-      
-      const { data: urlData } = supabase.storage
-        .from('user-photos')
-        .getPublicUrl(storagePath);
+      const result = await uploadPhotoToS3(pending.file, session.access_token);
         
       uploadedPhotos.push({
         user_id: session.user.id,
-        photo_url: urlData.publicUrl,
-        storage_path: storagePath,
+        photo_url: result.cloudFrontUrl,
+        storage_path: result.s3Key,
         display_order: pending.display_order,
         is_primary: pending.is_primary,
       });
@@ -328,7 +314,6 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
 
     // Step 4: Batch update existing photos (order and primary status)
     if (existingPhotos.length > 0) {
-      // Use individual updates since batch update of different values is complex
       for (const photo of existingPhotos) {
         const { error: updateError } = await supabase
           .from("user_photos")

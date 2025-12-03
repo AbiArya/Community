@@ -20,17 +20,28 @@ export default function ProfilePage() {
 
 function ProfilePageContent() {
   const router = useRouter();
-  const { data: profile, isLoading } = useProfileData();
+  const { data: profile, isLoading, error } = useProfileData();
 
   useEffect(() => {
-    if (isLoading || !profile) return;
-    if (profile.is_profile_complete === false) {
+    if (isLoading) return;
+    
+    // If user is authenticated but has no profile record, redirect to setup
+    if (!profile && error === "User not found") {
+      router.replace("/profile/setup");
+      return;
+    }
+    
+    // If profile exists but is incomplete, redirect to setup
+    if (profile && profile.is_profile_complete === false) {
       router.replace("/profile/setup");
     }
-  }, [isLoading, profile, router]);
+  }, [isLoading, profile, error, router]);
 
+  // Show loading state while checking or during redirect
   const shouldShowStatus =
-    isLoading || (profile?.is_profile_complete === false);
+    isLoading || 
+    (profile?.is_profile_complete === false) ||
+    (!profile && error === "User not found");
 
   return (
     <main className="mx-auto w-full max-w-3xl space-y-6 p-6">

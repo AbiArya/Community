@@ -79,6 +79,18 @@ type ProfileCacheEntry = {
 
 const profileCache = new Map<string, ProfileCacheEntry>();
 
+/**
+ * Clear the profile cache for a specific user or all users
+ * Call this after updating profile data outside of the normal flow
+ */
+export function clearProfileCache(userId?: string): void {
+  if (userId) {
+    profileCache.delete(userId);
+  } else {
+    profileCache.clear();
+  }
+}
+
 function getProfileCacheEntry(userId: string): ProfileCacheEntry {
   let entry = profileCache.get(userId);
   if (!entry) {

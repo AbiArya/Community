@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { PhotoUpload, type UploadedPhoto } from "@/components/profile/PhotoUpload";
 import { HobbySelector, type RankedHobby } from "@/components/profile/HobbySelector";
 import { DescriptionStep } from "@/components/profile/DescriptionStep";
@@ -9,6 +9,8 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useAuthSession } from "@/hooks/useAuthSession";
 import { useRouter } from "next/navigation";
 import { validateAndNormalizeZipcode } from "@/lib/utils/zipcode";
+import { uploadPhotoToS3 } from "@/lib/aws/storage-client";
+import { clearProfileCache } from "@/hooks/useProfileData";
 
 type WizardStep = 0 | 1 | 2 | 3;
 
@@ -45,28 +47,15 @@ export function ProfileWizard() {
       // Validate and convert zipcode to coordinates
       const { zipcode, latitude, longitude } = validateAndNormalizeZipcode(prefs.zipcode);
       
-      // Upload photos to Supabase Storage first
+      // Upload photos to S3
       const uploadedPhotos = [];
       for (let i = 0; i < photos.length; i++) {
         const photo = photos[i];
-        const fileExt = photo.file.name.split('.').pop();
-        const fileName = `${session.user.id}/${Date.now()}-${i}.${fileExt}`;
-        
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('user-photos')
-          .upload(fileName, photo.file);
-          
-        if (uploadError) {
-          throw new Error(`Failed to upload photo: ${uploadError.message}`);
-        }
-        
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from('user-photos')
-          .getPublicUrl(fileName);
+        const result = await uploadPhotoToS3(photo.file, session.access_token);
           
         uploadedPhotos.push({
-          photo_url: urlData.publicUrl,
+          photo_url: result.cloudFrontUrl,
+          storage_path: result.s3Key,
           display_order: i,
           is_primary: photo.isPrimary,
         });
@@ -166,6 +155,9 @@ export function ProfileWizard() {
           throw new Error(`Failed to save hobbies: ${hobbiesError.message}`);
         }
       }
+      
+      // Clear profile cache so the profile page fetches fresh data
+      clearProfileCache(session.user.id);
       
       // Redirect to profile page
       router.push("/profile");
