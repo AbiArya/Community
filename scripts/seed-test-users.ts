@@ -116,15 +116,25 @@ const BIO_TEMPLATES = [
   "Creative spirit who loves art, nature, and meeting interesting people.",
 ];
 
-// Hobby list (matches the seed-hobbies route)
-const HOBBIES = [
-  "Running", "Hiking", "Cycling", "Photography", "Cooking",
-  "Painting", "Reading", "Gaming", "Coding", "Board Games",
-  "Yoga", "Music", "Gardening", "Swimming", "Dancing",
-  "Traveling", "Writing", "Meditation", "Volunteering", "Learning Languages",
-  "Fishing", "Rock Climbing", "Skiing", "Surfing", "Chess",
-  "Podcasting", "Film Making", "Pottery", "Knitting", "Woodworking",
+// Photo categories for variety - using picsum.photos with specific IDs for consistency
+const PHOTO_SEED_RANGES = [
+  // Portrait-style photos (face-ish images from picsum)
+  { start: 1, end: 100 },
+  { start: 200, end: 300 },
+  { start: 400, end: 500 },
 ];
+
+// Generate a unique set of photo IDs for a user
+function generatePhotoIds(userIndex: number, count: number): number[] {
+  const ids: number[] = [];
+  const baseId = (userIndex * 7) % 1000; // Spread out across available images
+  for (let i = 0; i < count; i++) {
+    ids.push(baseId + (i * 100) + 1);
+  }
+  return ids;
+}
+
+// Note: Hobbies are fetched from the database dynamically to ensure consistency
 
 // Helper functions
 function randomInt(min: number, max: number): number {
@@ -144,26 +154,21 @@ function shuffleArray<T>(array: T[]): T[] {
   return result;
 }
 
-// Generate unique hobby combinations for each user
-function generateHobbyCombinations(count: number): string[][] {
+// Generate unique hobby combinations for each user using hobbies from database
+function generateHobbyCombinations(count: number, availableHobbies: string[]): string[][] {
   const combinations: string[][] = [];
-  const shuffledHobbies = shuffleArray(HOBBIES);
   
   for (let i = 0; i < count; i++) {
-    // Each user gets 3-7 hobbies
-    const hobbyCount = randomInt(3, 7);
+    // Each user gets 3-7 hobbies (but no more than available)
+    const maxHobbies = Math.min(7, availableHobbies.length);
+    const minHobbies = Math.min(3, availableHobbies.length);
+    const hobbyCount = randomInt(minHobbies, maxHobbies);
     
-    // Use different starting points in the shuffled array for variety
-    const startIndex = (i * 3) % HOBBIES.length;
-    const userHobbies: string[] = [];
+    // Shuffle and pick random hobbies for this user
+    const shuffled = shuffleArray(availableHobbies);
+    const userHobbies = shuffled.slice(0, hobbyCount);
     
-    for (let j = 0; j < hobbyCount; j++) {
-      const hobbyIndex = (startIndex + j) % HOBBIES.length;
-      userHobbies.push(shuffledHobbies[hobbyIndex]);
-    }
-    
-    // Shuffle the hobbies for this user to vary the preference order
-    combinations.push(shuffleArray(userHobbies));
+    combinations.push(userHobbies);
   }
   
   return combinations;
@@ -193,11 +198,12 @@ async function seedTestUsers() {
     
     // Create a map of hobby name to ID
     const hobbyMap = new Map(hobbiesData.map(h => [h.name, h.id]));
+    const availableHobbyNames = hobbiesData.map(h => h.name);
     
-    // Step 2: Generate hobby combinations
+    // Step 2: Generate hobby combinations using actual hobbies from database
     console.log('🎲 Generating hobby combinations...');
-    const hobbyCombinations = generateHobbyCombinations(100);
-    console.log(`✅ Generated 100 unique hobby combinations\n`);
+    const hobbyCombinations = generateHobbyCombinations(100, availableHobbyNames);
+    console.log(`✅ Generated 100 unique hobby combinations (using ${availableHobbyNames.length} available hobbies)\n`);
     
     // Step 3: Create users
     console.log('👥 Creating users...');
@@ -228,6 +234,7 @@ async function seedTestUsers() {
         latitude: location.lat,
         longitude: location.lng,
         is_profile_complete: true,
+        is_active: true,
         age_range_min: Math.max(18, age - 10),
         age_range_max: Math.min(100, age + 10),
         distance_radius: randomInt(10, 50),
@@ -302,11 +309,60 @@ async function seedTestUsers() {
     
     console.log(`\n✅ Successfully assigned hobbies to all users\n`);
     
-    // Step 5: Summary
+    // Step 5: Assign photos to users
+    console.log('📷 Assigning photos to users...');
+    const userPhotosToCreate = [];
+    
+    for (let i = 0; i < createdUsers.length; i++) {
+      const user = createdUsers[i];
+      // Each user gets 1-3 photos
+      const photoCount = randomInt(1, 3);
+      const photoIds = generatePhotoIds(i, photoCount);
+      
+      for (let j = 0; j < photoCount; j++) {
+        const photoId = photoIds[j];
+        // Use picsum.photos for realistic placeholder images
+        // Using 400x400 for profile photos
+        const photoUrl = `https://picsum.photos/id/${photoId}/400/400`;
+        
+        userPhotosToCreate.push({
+          user_id: user.id,
+          photo_url: photoUrl,
+          storage_path: `test-users/${user.id}/photo-${j}.jpg`, // Placeholder path for test photos
+          display_order: j,
+          is_primary: j === 0, // First photo is primary
+          file_type: 'image/jpeg',
+          file_size: 50000, // Approximate size
+        });
+      }
+    }
+    
+    console.log(`📝 Prepared ${userPhotosToCreate.length} photo assignments`);
+    
+    // Insert user photos in batches
+    for (let i = 0; i < userPhotosToCreate.length; i += BATCH_SIZE * 3) {
+      const batch = userPhotosToCreate.slice(i, i + BATCH_SIZE * 3);
+      const { error } = await supabase
+        .from('user_photos')
+        .insert(batch);
+      
+      if (error) {
+        console.error(`❌ Error inserting photos batch ${i / (BATCH_SIZE * 3) + 1}:`, error);
+        continue;
+      }
+      
+      console.log(`   ✅ Batch ${Math.floor(i / (BATCH_SIZE * 3)) + 1}/${Math.ceil(userPhotosToCreate.length / (BATCH_SIZE * 3))}: Assigned ${batch.length} photos`);
+    }
+    
+    console.log(`\n✅ Successfully assigned photos to all users\n`);
+
+    // Step 6: Summary
     console.log('📊 Summary:');
     console.log(`   • Users created: ${createdUsers.length}`);
     console.log(`   • Hobby assignments: ${userHobbiesToCreate.length}`);
+    console.log(`   • Photo assignments: ${userPhotosToCreate.length}`);
     console.log(`   • Average hobbies per user: ${(userHobbiesToCreate.length / createdUsers.length).toFixed(1)}`);
+    console.log(`   • Average photos per user: ${(userPhotosToCreate.length / createdUsers.length).toFixed(1)}`);
     console.log(`   • Location: Seattle, WA area (${SEATTLE_ZIPCODES.length} zipcodes)`);
     console.log(`   • Age range: 21-65 years old`);
     console.log('\n🎉 Test user seeding completed successfully!\n');
@@ -316,8 +372,10 @@ async function seedTestUsers() {
     for (let i = 0; i < Math.min(5, createdUsers.length); i++) {
       const user = createdUsers[i];
       const userHobbies = hobbyCombinations[i];
+      const userPhotoCount = userPhotosToCreate.filter(p => p.user_id === user.id).length;
       console.log(`   ${i + 1}. ${user.full_name} (${user.email})`);
       console.log(`      Hobbies: ${userHobbies.join(', ')}`);
+      console.log(`      Photos: ${userPhotoCount}`);
     }
     
   } catch (error) {

@@ -32,7 +32,8 @@ export function Navigation() {
     const isActiveHash = pathname === "/" && href.startsWith("/#") && hash === href.slice(1);
     const isActiveProfile = href === "/profile" && pathname.startsWith("/profile");
     const isActiveSettings = href === "/settings" && pathname.startsWith("/settings");
-    const active = isActiveRoute || isActiveHome || isActiveHash || isActiveProfile || isActiveSettings;
+    const isActiveMatches = href === "/matches" && pathname.startsWith("/matches");
+    const active = isActiveRoute || isActiveHome || isActiveHash || isActiveProfile || isActiveSettings || isActiveMatches;
     return active ? `${base} text-ink-900` : base;
   }
 
@@ -98,6 +99,9 @@ export function Navigation() {
 
   const authLinks = isLoading ? null : session ? (
     <>
+      <Link href="/matches" className={linkClass("/matches")}>
+        Matches
+      </Link>
       <Link href="/profile" className={linkClass("/profile")}>
         Profile
       </Link>
@@ -136,15 +140,19 @@ export function Navigation() {
           Community Friends
         </Link>
         <nav className="hidden items-center gap-5 sm:flex">
-          <Link href="/" className={linkClass("/")}>
-            Home
-          </Link>
-          <Link href="/#features" className={linkClass("/#features")}>
-            Features
-          </Link>
-          <Link href="/#faq" className={linkClass("/#faq")}>
-            FAQ
-          </Link>
+          {!session && (
+            <>
+              <Link href="/" className={linkClass("/")}>
+                Home
+              </Link>
+              <Link href="/#features" className={linkClass("/#features")}>
+                Features
+              </Link>
+              <Link href="/#faq" className={linkClass("/#faq")}>
+                FAQ
+              </Link>
+            </>
+          )}
           {authLinks}
         </nav>
 
@@ -188,17 +196,24 @@ export function Navigation() {
               </button>
             </div>
             <div className="flex flex-col gap-3 text-sm">
-              <Link href="/" className={linkClass("/")} onClick={() => setMenuOpen(false)}>
-                Home
-              </Link>
-              <Link href="/#features" className={linkClass("/#features")} onClick={() => setMenuOpen(false)}>
-                Features
-              </Link>
-              <Link href="/#faq" className={linkClass("/#faq")} onClick={() => setMenuOpen(false)}>
-                FAQ
-              </Link>
+              {!session && (
+                <>
+                  <Link href="/" className={linkClass("/")} onClick={() => setMenuOpen(false)}>
+                    Home
+                  </Link>
+                  <Link href="/#features" className={linkClass("/#features")} onClick={() => setMenuOpen(false)}>
+                    Features
+                  </Link>
+                  <Link href="/#faq" className={linkClass("/#faq")} onClick={() => setMenuOpen(false)}>
+                    FAQ
+                  </Link>
+                </>
+              )}
               {isLoading ? null : session ? (
                 <>
+                  <Link href="/matches" className={linkClass("/matches")} onClick={() => setMenuOpen(false)}>
+                    Matches
+                  </Link>
                   <Link href="/profile" className={linkClass("/profile")} onClick={() => setMenuOpen(false)}>
                     Profile
                   </Link>

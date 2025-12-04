@@ -11,8 +11,8 @@ A friend-matching web application that connects users based on shared hobbies an
 - **Deployment**: Vercel
 - **Cost**: $0/month (free tiers)
 
-## Current Focus: Phase 6.2 - Match Display UI
-The backend generates matches weekly (AWS Lambda). Now build the UI for users to see them!
+## Current Focus: Phase 6.3 - Live Chat & Messaging
+Match Display UI is complete! Users can now view their matches with beautiful cards, stats dashboard, and weekly grouping. Next: build the messaging system.
 
 ## Development Phases
 
@@ -123,11 +123,11 @@ The backend generates matches weekly (AWS Lambda). Now build the UI for users to
 - [x] Set up weekly match scheduling
 
 #### Milestone 6.2: Match Display & Interaction
-- [ ] Design match cards interface (view-only)
-- [ ] Create match history page
-- [ ] Add match viewing tracking
-- [ ] Create simple contact display/connection
-- [ ] Create match statistics dashboard
+- [x] Design match cards interface (view-only)
+- [x] Create match history page
+- [x] Add match viewing tracking
+- [x] Create simple contact display/connection
+- [x] Create match statistics dashboard
 
 #### Milestone 6.3: Live Chat & Messaging
 - [ ] Design messages table schema
@@ -189,10 +189,90 @@ The backend generates matches weekly (AWS Lambda). Now build the UI for users to
 - [ ] Final security audit
 - [ ] Soft launch with beta users
 
-### Phase 9: Future Enhancements ⏳
+### Phase 8.5: Visual Rebrand (Friendship Theme) ⏳
+**Timeline**: Before Launch (Week 8-9)
+**Goal**: Shift from romance-coded visuals to friendship-focused aesthetics.
+
+#### Milestone 8.5.1: Color Palette Overhaul
+- [ ] Replace purple/peach palette with friendship-oriented colors (teal, warm indigo, or friendly greens)
+- [ ] Update CSS custom properties in globals.css
+- [ ] Maintain semantic color tokens (success, error, warning)
+- [ ] Test new palette for accessibility (contrast ratios)
+
+#### Milestone 8.5.2: Iconography Update
+- [ ] Replace all heart icons with friendship-appropriate alternatives:
+  - Hearts → High-fives, handshakes, sparkles, or people icons
+  - Compatibility badge icon
+  - Page headers and navigation
+  - Match cards and stats
+- [ ] Update any romantic language/copy throughout the app
+- [ ] Audit and refresh illustrations/graphics if any
+
+#### Milestone 8.5.3: Tone & Copy Review
+- [ ] Review all user-facing copy for romantic undertones
+- [ ] Update microcopy to emphasize friendship, community, connection
+- [ ] Refresh landing page messaging to clarify friend-matching purpose
+
+### Phase 9: Community & Group Features ⏳
 **Timeline**: Post-Launch
 
-#### Milestone 9.1: Data Management & Onboarding
+#### Milestone 9.1: Group Chat System (Community Building)
+**Core differentiator** - transitioning from 1:1 connections to community groups.
+- [ ] Design groups/communities table schema
+- [ ] Create group membership and roles schema
+- [ ] Add "Merge Chats" functionality to combine 1:1 conversations
+- [ ] Design group creation flow (from existing matches)
+- [ ] Build group chat UI (extend 1:1 messaging components)
+- [ ] Implement group management (add/remove members, admin controls)
+- [ ] Add group discovery (find communities based on hobbies/location)
+- [ ] Create group activity feed and notifications
+- [ ] Design "community health" metrics and engagement features
+
+#### Milestone 9.2: AI/LLM Integration
+Practical LLM applications for enhanced user experience (also for learning purposes).
+
+**Infrastructure:**
+- [ ] Set up LLM provider integration (OpenAI/Anthropic API)
+- [ ] Create prompt templates and evaluation framework
+- [ ] Implement caching/rate limiting for cost control
+
+**Features (ordered by complexity):**
+- [ ] **Conversation Starters**: Generate personalized icebreakers based on shared hobbies
+- [ ] **Match Explanations**: Go beyond scores to explain *why* two people match well
+- [ ] **Profile Bio Coach**: Help users write engaging, authentic bios
+- [ ] **Smart Moderation**: Content moderation for messages and profiles
+- [ ] **Group Formation Suggestions**: Suggest which connections might gel well as a group
+
+#### Milestone 9.3: Chat-Based Activity Recommendations
+LLM-powered suggestions based on individual conversation context.
+> "You two mentioned grabbing coffee → here are spots near you both"
+
+**Core Flow:**
+- [ ] Add "Get Suggestions" button in chat UI
+- [ ] Fetch conversation history for that specific chat
+- [ ] LLM extracts actionable intent (coffee, concerts, hiking, food, etc.)
+- [ ] Query external APIs based on intent + users' locations
+- [ ] Display recommendations inline in the chat thread
+
+**External API Integrations:**
+- [ ] Yelp/Google Places API (coffee, restaurants, activities)
+- [ ] Ticketmaster API (concerts, live events)
+- [ ] Eventbrite API (local events, classes, meetups)
+- [ ] Handle API keys, rate limits, error handling
+
+**Location Logic:**
+- [ ] Calculate midpoint or "convenient for both" locations
+- [ ] Use existing user zipcode/lat-long data
+
+**UX Polish:**
+- [ ] Shareable recommendation cards (both users see same suggestions)
+- [ ] "Save for later" or "Add to plans" functionality
+- [ ] Feedback loop: "Was this helpful?" for prompt tuning
+
+### Phase 10: Future Enhancements ⏳
+**Timeline**: Post-Launch
+
+#### Milestone 10.1: Data Management & Onboarding
 - [ ] Create profile completion tracking
 - [ ] Add user onboarding checklist
 
@@ -354,7 +434,7 @@ src/
 
 ## Current Status
 
-### ✅ Completed (Phases 1-6.1)
+### ✅ Completed (Phases 1-6.2)
 | Phase | Status |
 |-------|--------|
 | 1. Foundation & Setup | ✅ Complete |
@@ -363,17 +443,22 @@ src/
 | 4. Profile Management | ✅ Complete |
 | 5. Settings & Account | ✅ Complete |
 | 6.1 Matching Algorithm | ✅ Complete |
+| 6.2 Match Display UI | ✅ Complete |
 
-### 📍 Next Up: Phase 6.2 - Match Display UI
-- [ ] Design match cards interface
-- [ ] Create match history page  
-- [ ] Add match viewing tracking
-- [ ] Create match statistics dashboard
-
-### Then: Phase 6.3 - Messaging
+### 📍 Next Up: Phase 6.3 - Messaging
 - [ ] Conversations/messages schema
 - [ ] Chat UI with Supabase Realtime
 - [ ] Read receipts, typing indicators
+
+### 🗺️ Roadmap Preview
+| Phase | Description | Status |
+|-------|-------------|--------|
+| 7. Testing & Polish | Unit tests, cross-browser, performance | ⏳ Pending |
+| 8. Deployment & Launch | Vercel, production Supabase, domain | ⏳ Pending |
+| 8.5 Visual Rebrand | Friendship-themed colors, icons, copy | ⏳ Pending |
+| 9.1 Group Chat System | Merge 1:1 chats → community groups | ⏳ Pending |
+| 9.2 AI/LLM Integration | Icebreakers, match explanations, moderation | ⏳ Pending |
+| 9.3 Chat Recommendations | LLM extracts intent → suggest places/events | ⏳ Pending |
 
 ### Infrastructure (see `AWS-MIGRATION-PLAN.md`)
 - **Photos:** AWS S3 + CloudFront
@@ -392,5 +477,5 @@ src/
 - Average session duration > 5 minutes
 
 ---
-*Last Updated*: 2025-12-03
-*Status*: Phase 6.2 Ready - Match Display UI
+*Last Updated*: 2025-12-04
+*Status*: Phase 6.2 Complete - Ready for Messaging (6.3)
