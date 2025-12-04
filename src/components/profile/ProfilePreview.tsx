@@ -117,7 +117,7 @@ export function ProfilePreview() {
                       key={userHobby.id}
                       className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs"
                     >
-                      {userHobby.hobby.name}
+                      {userHobby.hobby?.name}
                     </span>
                   ))}
                 {profile.hobbies.length > 6 && (

@@ -379,6 +379,7 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
     const hobbiesToUpdate: UserHobbyRow[] = [];
 
     for (const hobby of localHobbies) {
+      if (!hobby.hobby_id) continue; // Skip if no hobby_id
       const existing = currentHobbyMap.get(hobby.hobby_id);
 
       if (!existing) {
