@@ -14,6 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
+      chats: {
+        Row: {
+          id: string
+          name: string | null
+          avatar_url: string | null
+          created_by: string | null
+          created_at: string | null
+          updated_at: string | null
+          last_message_at: string | null
+          last_message_preview: string | null
+          metadata: Record<string, unknown> | null
+        }
+        Insert: {
+          id?: string
+          name?: string | null
+          avatar_url?: string | null
+          created_by?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          metadata?: Record<string, unknown> | null
+        }
+        Update: {
+          id?: string
+          name?: string | null
+          avatar_url?: string | null
+          created_by?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          metadata?: Record<string, unknown> | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chats_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      chat_members: {
+        Row: {
+          chat_id: string
+          user_id: string
+          role: string | null
+          joined_at: string | null
+          left_at: string | null
+          last_read_at: string | null
+          is_muted: boolean | null
+        }
+        Insert: {
+          chat_id: string
+          user_id: string
+          role?: string | null
+          joined_at?: string | null
+          left_at?: string | null
+          last_read_at?: string | null
+          is_muted?: boolean | null
+        }
+        Update: {
+          chat_id?: string
+          user_id?: string
+          role?: string | null
+          joined_at?: string | null
+          left_at?: string | null
+          last_read_at?: string | null
+          is_muted?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_members_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       hobbies: {
         Row: {
           category: string | null
@@ -89,6 +178,57 @@ export type Database = {
           },
         ]
       }
+      messages: {
+        Row: {
+          id: string
+          chat_id: string
+          sender_id: string
+          content: string
+          message_type: string | null
+          created_at: string | null
+          edited_at: string | null
+          deleted_at: string | null
+          metadata: Record<string, unknown> | null
+        }
+        Insert: {
+          id?: string
+          chat_id: string
+          sender_id: string
+          content: string
+          message_type?: string | null
+          created_at?: string | null
+          edited_at?: string | null
+          deleted_at?: string | null
+          metadata?: Record<string, unknown> | null
+        }
+        Update: {
+          id?: string
+          chat_id?: string
+          sender_id?: string
+          content?: string
+          message_type?: string | null
+          created_at?: string | null
+          edited_at?: string | null
+          deleted_at?: string | null
+          metadata?: Record<string, unknown> | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       spatial_ref_sys: {
         Row: {
           auth_name: string | null
@@ -112,6 +252,42 @@ export type Database = {
           srtext?: string | null
         }
         Relationships: []
+      }
+      typing_indicators: {
+        Row: {
+          chat_id: string
+          user_id: string
+          is_typing: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          chat_id: string
+          user_id: string
+          is_typing?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          chat_id?: string
+          user_id?: string
+          is_typing?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "typing_indicators_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "typing_indicators_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       user_hobbies: {
         Row: {
@@ -308,6 +484,22 @@ export type Database = {
       }
     }
     Functions: {
+      get_or_create_direct_chat: {
+        Args: { p_other_user_id: string }
+        Returns: string
+      }
+      get_unread_message_count: {
+        Args: Record<string, never>
+        Returns: number
+      }
+      mark_chat_as_read: {
+        Args: { p_chat_id: string }
+        Returns: undefined
+      }
+      get_chat_unread_count: {
+        Args: { p_chat_id: string }
+        Returns: number
+      }
       _postgis_deprecate: {
         Args: { newname: string; oldname: string; version: string }
         Returns: undefined

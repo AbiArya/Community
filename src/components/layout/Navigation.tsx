@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthSession } from "@/hooks/useAuthSession";
+import { useUnreadCount } from "@/hooks/useUnreadCount";
 import { clearAuthSession } from "@/lib/supabase/client";
 
 export function Navigation() {
   const router = useRouter();
   const { session, isLoading } = useAuthSession();
+  const { count: unreadCount } = useUnreadCount();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -33,7 +35,8 @@ export function Navigation() {
     const isActiveProfile = href === "/profile" && pathname.startsWith("/profile");
     const isActiveSettings = href === "/settings" && pathname.startsWith("/settings");
     const isActiveMatches = href === "/matches" && pathname.startsWith("/matches");
-    const active = isActiveRoute || isActiveHome || isActiveHash || isActiveProfile || isActiveSettings || isActiveMatches;
+    const isActiveMessages = href === "/messages" && pathname.startsWith("/messages");
+    const active = isActiveRoute || isActiveHome || isActiveHash || isActiveProfile || isActiveSettings || isActiveMatches || isActiveMessages;
     return active ? `${base} text-ink-900` : base;
   }
 
@@ -101,6 +104,14 @@ export function Navigation() {
     <>
       <Link href="/matches" className={linkClass("/matches")}>
         Matches
+      </Link>
+      <Link href="/messages" className={`${linkClass("/messages")} relative`}>
+        Messages
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        )}
       </Link>
       <Link href="/profile" className={linkClass("/profile")}>
         Profile
@@ -213,6 +224,14 @@ export function Navigation() {
                 <>
                   <Link href="/matches" className={linkClass("/matches")} onClick={() => setMenuOpen(false)}>
                     Matches
+                  </Link>
+                  <Link href="/messages" className={`${linkClass("/messages")} flex items-center gap-2`} onClick={() => setMenuOpen(false)}>
+                    Messages
+                    {unreadCount > 0 && (
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
                   </Link>
                   <Link href="/profile" className={linkClass("/profile")} onClick={() => setMenuOpen(false)}>
                     Profile

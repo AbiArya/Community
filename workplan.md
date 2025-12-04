@@ -11,8 +11,8 @@ A friend-matching web application that connects users based on shared hobbies an
 - **Deployment**: Vercel
 - **Cost**: $0/month (free tiers)
 
-## Current Focus: Phase 6.3 - Live Chat & Messaging
-Match Display UI is complete! Users can now view their matches with beautiful cards, stats dashboard, and weekly grouping. Next: build the messaging system.
+## Current Focus: Phase 7 - Testing & Polish
+Phase 6.3 (Messaging) is complete! Users can now chat with matches in real-time using a unified chat system that supports both 1:1 and future group chats. Next up: testing, polish, and deployment prep.
 
 ## Development Phases
 
@@ -129,30 +129,32 @@ Match Display UI is complete! Users can now view their matches with beautiful ca
 - [x] Create simple contact display/connection
 - [x] Create match statistics dashboard
 
-#### Milestone 6.3: Live Chat & Messaging
-- [ ] Design messages table schema
-- [ ] Design conversations/threads table schema
-- [ ] Add RLS policies for message privacy
-- [ ] Create database indexes for query optimization
-- [ ] Set up Supabase Realtime subscriptions for messages
-- [ ] Configure presence tracking for online/offline status
-- [ ] Implement typing indicators
-- [ ] Add read receipts tracking
-- [ ] Design chat list/inbox page (all conversations)
-- [ ] Create conversation thread component (individual chat)
-- [ ] Build message composer with emoji support
-- [ ] Add image/photo sharing in messages
-- [ ] Implement message timestamps and read indicators
-- [ ] Design mobile-optimized chat interface
-- [ ] Implement sending and receiving text messages
-- [ ] Add real-time message updates
-- [ ] Add conversation search/filtering
-- [ ] Implement message moderation/reporting
-- [ ] Add conversation archiving/deletion
-- [ ] Add "Start Chat" button on match cards
-- [ ] Create unread message badge on navigation
-- [ ] Link match profiles to chat threads
-- [ ] Add chat history to match details
+#### Milestone 6.3: Live Chat & Messaging ✅
+**Schema:** Unified `chats` + `chat_members` + `messages` (supports 1:1 and groups)
+**Unread Tracking:** Watermark approach (`last_read_at`) - same as Slack/Discord
+
+- [x] Design unified chat schema (works for 1:1 and groups)
+- [x] Add RLS policies for message privacy
+- [x] Create database indexes for query optimization
+- [x] Set up Supabase Realtime subscriptions for messages
+- [x] Implement typing indicators
+- [x] Add unread tracking (watermark approach)
+- [x] Design chat list/inbox page
+- [x] Create message thread component
+- [x] Build message composer
+- [x] Implement message timestamps
+- [x] Design mobile-optimized chat interface
+- [x] Implement sending and receiving text messages
+- [x] Add real-time message updates
+- [x] Add "Start Chat" button on match cards
+- [x] Create unread message badge on navigation
+
+**Deferred (nice-to-have):**
+- [ ] Online/offline presence tracking
+- [ ] Image/photo sharing in messages
+- [ ] Conversation search/filtering
+- [ ] Message moderation/reporting
+- [ ] Mute chat UI (schema ready)
 
 ### Phase 7: Testing & Polish ⏳
 **Timeline**: Week 7-8
@@ -351,15 +353,32 @@ matches (
 )
 ```
 
-#### Conversations Table
+#### Chats Table
 ```sql
-conversations (
+chats (
   id UUID PRIMARY KEY,
-  match_id UUID REFERENCES matches(id),
-  created_at TIMESTAMP,
-  updated_at TIMESTAMP,
-  last_message_at TIMESTAMP,
-  last_message_preview TEXT
+  name VARCHAR(100),              -- NULL for 1:1, set for groups
+  avatar_url VARCHAR(500),        -- Group photo
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ,
+  last_message_at TIMESTAMPTZ,
+  last_message_preview TEXT,
+  metadata JSONB                  -- Flexible extra data
+)
+```
+
+#### Chat Members Table
+```sql
+chat_members (
+  chat_id UUID REFERENCES chats(id),
+  user_id UUID REFERENCES users(id),
+  role VARCHAR(20),               -- 'member', 'admin', 'owner'
+  joined_at TIMESTAMPTZ,
+  left_at TIMESTAMPTZ,            -- NULL if active
+  last_read_at TIMESTAMPTZ,       -- Unread tracking (watermark)
+  is_muted BOOLEAN DEFAULT false,
+  PRIMARY KEY (chat_id, user_id)
 )
 ```
 
@@ -367,16 +386,14 @@ conversations (
 ```sql
 messages (
   id UUID PRIMARY KEY,
-  conversation_id UUID REFERENCES conversations(id),
+  chat_id UUID REFERENCES chats(id),
   sender_id UUID REFERENCES users(id),
-  receiver_id UUID REFERENCES users(id),
   content TEXT,
-  message_type VARCHAR DEFAULT 'text', -- 'text', 'image', 'system'
-  is_read BOOLEAN DEFAULT false,
-  read_at TIMESTAMP,
-  created_at TIMESTAMP,
-  deleted_by_sender BOOLEAN DEFAULT false,
-  deleted_by_receiver BOOLEAN DEFAULT false
+  message_type VARCHAR(20),       -- 'text', 'image', 'system'
+  created_at TIMESTAMPTZ,
+  edited_at TIMESTAMPTZ,
+  deleted_at TIMESTAMPTZ,         -- Soft delete
+  metadata JSONB                  -- Image URLs, link previews, etc.
 )
 ```
 
@@ -391,21 +408,22 @@ src/
 │   │   ├── profile/
 │   │   ├── settings/
 │   │   ├── matches/
-│   │   └── messages/
+│   │   └── messages/        # Chat inbox & threads
 │   ├── globals.css
 │   ├── layout.tsx
 │   └── page.tsx
 ├── components/
-│   ├── ui/
 │   ├── auth/
+│   ├── layout/
 │   ├── profile/
 │   ├── matches/
-│   └── messaging/
+│   ├── messaging/           # ChatList, MessageThread, MessageComposer, ChatHeader
+│   └── settings/
 ├── lib/
 │   ├── supabase/
-│   ├── utils/
-│   └── types/
-├── hooks/
+│   ├── utils/               # date.ts, validators.ts, zipcode.ts
+│   └── aws/
+├── hooks/                   # useMessages.tsx, useMatches.tsx, useUnreadCount.tsx
 └── middleware.ts
 ```
 
@@ -434,7 +452,7 @@ src/
 
 ## Current Status
 
-### ✅ Completed (Phases 1-6.2)
+### ✅ Completed (Phases 1-6.3)
 | Phase | Status |
 |-------|--------|
 | 1. Foundation & Setup | ✅ Complete |
@@ -444,11 +462,13 @@ src/
 | 5. Settings & Account | ✅ Complete |
 | 6.1 Matching Algorithm | ✅ Complete |
 | 6.2 Match Display UI | ✅ Complete |
+| 6.3 Live Chat & Messaging | ✅ Complete |
 
-### 📍 Next Up: Phase 6.3 - Messaging
-- [ ] Conversations/messages schema
-- [ ] Chat UI with Supabase Realtime
-- [ ] Read receipts, typing indicators
+### 📍 Next Up: Phase 7 - Testing & Polish
+- [ ] Unit test core components
+- [ ] Integration test auth flow
+- [ ] Cross-browser compatibility
+- [ ] Performance optimization
 
 ### 🗺️ Roadmap Preview
 | Phase | Description | Status |
@@ -478,4 +498,4 @@ src/
 
 ---
 *Last Updated*: 2025-12-04
-*Status*: Phase 6.2 Complete - Ready for Messaging (6.3)
+*Status*: Phase 6.3 Complete - Ready for Testing & Polish (Phase 7)
