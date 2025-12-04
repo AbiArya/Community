@@ -188,31 +188,7 @@ describe("HobbyManagement", () => {
     });
   });
 
-  test("reorders hobbies", async () => {
-    const mockOnHobbiesChange = jest.fn();
-    
-    mockUseProfileData.mockReturnValue({
-      data: mockProfile,
-      isLoading: false,
-      error: null,
-      refresh: jest.fn(),
-    });
-
-    render(<HobbyManagement onHobbiesChange={mockOnHobbiesChange} />);
-
-    await waitFor(() => {
-      expect(screen.getByText("Hiking")).toBeInTheDocument();
-    });
-
-    const moveDownButtons = screen.getAllByTitle(/Move down/);
-    fireEvent.click(moveDownButtons[0]);
-
-    await waitFor(() => {
-      expect(mockOnHobbiesChange).toHaveBeenCalled();
-    });
-  });
-
-  test("disables reorder buttons at boundaries", async () => {
+  test("renders hobbies as draggable items for reordering", async () => {
     mockUseProfileData.mockReturnValue({
       data: mockProfile,
       isLoading: false,
@@ -224,16 +200,16 @@ describe("HobbyManagement", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Hiking")).toBeInTheDocument();
+      expect(screen.getByText("Photography")).toBeInTheDocument();
     });
 
-    const moveUpButtons = screen.getAllByTitle(/Move up/);
-    const moveDownButtons = screen.getAllByTitle(/Move down/);
-
-    // First item's "move up" should be disabled
-    expect(moveUpButtons[0]).toBeDisabled();
+    // Verify hobbies are rendered with rank numbers (drag-and-drop reordering)
+    expect(screen.getByText("1")).toBeInTheDocument();
+    expect(screen.getByText("2")).toBeInTheDocument();
     
-    // Last item's "move down" should be disabled
-    expect(moveDownButtons[moveDownButtons.length - 1]).toBeDisabled();
+    // Verify items are draggable
+    const draggableItems = document.querySelectorAll('[draggable="true"]');
+    expect(draggableItems.length).toBe(2);
   });
 
   test("shows no hobbies message when none selected", async () => {

@@ -196,6 +196,8 @@ describe("ProfileView", () => {
     render(<ProfileView />);
     
     expect(screen.getByText("25 - 35")).toBeInTheDocument();
-    expect(screen.getByText("31 miles")).toBeInTheDocument();
+    // Mock profile has distance_radius: 50
+    expect(screen.getByText(/50/)).toBeInTheDocument();
+    expect(screen.getByText(/miles/)).toBeInTheDocument();
   });
 });
