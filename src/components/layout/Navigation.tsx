@@ -151,7 +151,7 @@ export function Navigation() {
           Community Friends
         </Link>
         <nav className="hidden items-center gap-5 sm:flex">
-          {!session && (
+          {!isLoading && !session && (
             <>
               <Link href="/" className={linkClass("/")}>
                 Home
@@ -207,7 +207,7 @@ export function Navigation() {
               </button>
             </div>
             <div className="flex flex-col gap-3 text-sm">
-              {!session && (
+              {!isLoading && !session && (
                 <>
                   <Link href="/" className={linkClass("/")} onClick={() => setMenuOpen(false)}>
                     Home
