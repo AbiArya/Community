@@ -18,19 +18,19 @@ export interface UserPhoto {
   photo_url: string;
   storage_path?: string | null;
   display_order: number;
-  is_primary: boolean;
-  created_at: string;
+  is_primary: boolean | null;
+  created_at?: string | null;
 }
 
 export interface UserHobby {
   id: string;
-  hobby_id: string;
+  hobby_id: string | null;
   preference_rank: number;
   hobby: {
     id: string;
     name: string;
-    category: string;
-  };
+    category: string | null;
+  } | null;
 }
 
 export interface ProfileData {
@@ -43,7 +43,7 @@ export interface ProfileData {
   latitude: number | null;
   longitude: number | null;
   age: number | null;
-  phone_number: string | null;
+  phone_number?: string | null;
   is_profile_complete: boolean;
   match_frequency: number;
   age_range_min: number;

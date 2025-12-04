@@ -12,7 +12,6 @@ export interface ZipcodeData {
   longitude: number;
   city?: string;
   state?: string;
-  county?: string;
 }
 
 /**
@@ -54,7 +53,6 @@ export function zipcodeToCoordinates(zipcode: string): ZipcodeData | null {
     longitude: data.longitude,
     city: data.city,
     state: data.state,
-    county: data.county,
   };
 }
 
