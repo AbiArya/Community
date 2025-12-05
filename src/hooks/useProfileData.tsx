@@ -175,7 +175,22 @@ async function fetchProfileForUser(userId: string, options?: { force?: boolean }
       }
 
       const profileData: ProfileData = {
-        ...userData,
+        id: userData.id,
+        email: userData.email,
+        full_name: userData.full_name,
+        bio: userData.bio,
+        location: userData.location,
+        zipcode: userData.zipcode,
+        latitude: userData.latitude,
+        longitude: userData.longitude,
+        age: userData.age,
+        is_profile_complete: userData.is_profile_complete ?? false,
+        match_frequency: userData.match_frequency ?? 2,
+        age_range_min: userData.age_range_min ?? 18,
+        age_range_max: userData.age_range_max ?? 100,
+        distance_radius: userData.distance_radius ?? 50,
+        created_at: userData.created_at ?? new Date().toISOString(),
+        updated_at: userData.updated_at ?? new Date().toISOString(),
         photos: photosData || [],
         hobbies: hobbiesData || [],
       };

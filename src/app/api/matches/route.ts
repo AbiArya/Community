@@ -130,15 +130,15 @@ export async function GET(request: NextRequest) {
           bio: userData.profile.bio,
           location: userData.profile.location,
           zipcode: userData.profile.zipcode,
-          photos: userData.photos,
-          hobbies: userData.hobbies.map(h => ({
+          photos: userData.photos || [],
+          hobbies: (userData.hobbies || []).map(h => ({
             id: h.id,
             preference_rank: h.preference_rank,
             hobby: h.hobbies
           }))
         } : null
       };
-    }).filter(m => m.matched_user !== null);
+    }).filter(m => m.matched_user !== null) as EnrichedMatch[];
 
     // Calculate stats
     const stats = calculateStats(enrichedMatches);

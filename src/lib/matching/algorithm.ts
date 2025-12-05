@@ -244,7 +244,7 @@ export function generateMatches(
  */
 export function applyDiversityFilter(
   newMatches: MatchResult[],
-  recentMatches: MatchResult[]
+  recentMatches: Array<{ user_2_id: string }>
 ): MatchResult[] {
   if (recentMatches.length === 0) {
     return newMatches;
