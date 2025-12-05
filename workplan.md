@@ -11,8 +11,8 @@ A friend-matching web application that connects users based on shared hobbies an
 - **Deployment**: Vercel
 - **Cost**: $0/month (free tiers)
 
-## Current Focus: Phase 7 - Testing & Polish
-Phase 6.3 (Messaging) is complete! Users can now chat with matches in real-time using a unified chat system that supports both 1:1 and future group chats. Next up: testing, polish, and deployment prep.
+## Current Focus: Phase 8 - Visual Rebrand
+Phase 7 (Testing & Polish) is complete! The app has 176 passing tests, loading skeletons, error boundaries, and micro-interactions. Next up: rebrand from romance-coded purple/hearts to friendship-focused visuals.
 
 ## Development Phases
 
@@ -156,11 +156,11 @@ Phase 6.3 (Messaging) is complete! Users can now chat with matches in real-time 
 - [ ] Message moderation/reporting
 - [ ] Mute chat UI (schema ready)
 
-### Phase 7: Testing & Polish ⏳
+### Phase 7: Testing & Polish ✅
 **Timeline**: Week 7-8
 
 #### Milestone 7.1: Testing & Bug Fixes
-- [x] Unit test core components (161 tests passing - auth, profile, settings, matches, messaging)
+- [x] Unit test core components (176 tests passing - auth, profile, settings, matches, messaging)
 - [x] Test matching algorithm accuracy (comprehensive algorithm tests)
 - [x] Performance optimization:
   - [x] Moved zipcodes database (4.4MB) to server-side API route (96% bundle reduction)
@@ -172,41 +172,26 @@ Phase 6.3 (Messaging) is complete! Users can now chat with matches in real-time 
 - [ ] Mobile responsiveness testing
 - [ ] Integration test auth flow (E2E with Cypress)
 
-#### Milestone 7.2: UI/UX Polish
-- [ ] Implement loading skeletons
-- [ ] Add micro-interactions
+#### Milestone 7.2: UI/UX Polish ✅
+- [x] Implement loading skeletons (reusable Skeleton components + ProfileView + Settings)
+- [x] Add micro-interactions (buttons, cards, nav links, inputs)
 - [x] Optimize image loading (Next.js Image)
-- [ ] Add error boundaries
+- [x] Add error boundaries (global, dashboard, root layout)
+
+**Deferred:**
 - [ ] Improve accessibility (WCAG compliance)
 
-### Phase 8: Deployment & Launch ⏳
+### Phase 8: Visual Rebrand (Friendship Theme) ⏳
 **Timeline**: Week 9
-
-#### Milestone 8.1: Production Setup
-- [ ] Configure Vercel deployment
-- [ ] Set up production Supabase environment
-- [ ] Configure custom domain
-- [ ] Set up analytics (Google Analytics/Plausible)
-- [ ] Implement error monitoring (Sentry)
-
-#### Milestone 8.2: Launch Preparation
-- [ ] Create user onboarding flow
-- [ ] Set up customer support system
-- [ ] Create privacy policy and terms of service
-- [ ] Final security audit
-- [ ] Soft launch with beta users
-
-### Phase 8.5: Visual Rebrand (Friendship Theme) ⏳
-**Timeline**: Before Launch (Week 8-9)
 **Goal**: Shift from romance-coded visuals to friendship-focused aesthetics.
 
-#### Milestone 8.5.1: Color Palette Overhaul
+#### Milestone 8.1: Color Palette Overhaul
 - [ ] Replace purple/peach palette with friendship-oriented colors (teal, warm indigo, or friendly greens)
 - [ ] Update CSS custom properties in globals.css
 - [ ] Maintain semantic color tokens (success, error, warning)
 - [ ] Test new palette for accessibility (contrast ratios)
 
-#### Milestone 8.5.2: Iconography Update
+#### Milestone 8.2: Iconography Update
 - [ ] Replace all heart icons with friendship-appropriate alternatives:
   - Hearts → High-fives, handshakes, sparkles, or people icons
   - Compatibility badge icon
@@ -215,7 +200,7 @@ Phase 6.3 (Messaging) is complete! Users can now chat with matches in real-time 
 - [ ] Update any romantic language/copy throughout the app
 - [ ] Audit and refresh illustrations/graphics if any
 
-#### Milestone 8.5.3: Tone & Copy Review
+#### Milestone 8.3: Tone & Copy Review
 - [ ] Review all user-facing copy for romantic undertones
 - [ ] Update microcopy to emphasize friendship, community, connection
 - [ ] Refresh landing page messaging to clarify friend-matching purpose
@@ -276,10 +261,27 @@ LLM-powered suggestions based on individual conversation context.
 - [ ] "Save for later" or "Add to plans" functionality
 - [ ] Feedback loop: "Was this helpful?" for prompt tuning
 
-### Phase 10: Future Enhancements ⏳
+### Phase 10: Deployment & Launch ⏳
+**Timeline**: When ready for production
+
+#### Milestone 10.1: Production Setup
+- [ ] Configure Vercel deployment
+- [ ] Set up production Supabase environment
+- [ ] Configure custom domain
+- [ ] Set up analytics (Google Analytics/Plausible)
+- [ ] Implement error monitoring (Sentry)
+
+#### Milestone 10.2: Launch Preparation
+- [ ] Create user onboarding flow
+- [ ] Set up customer support system
+- [ ] Create privacy policy and terms of service
+- [ ] Final security audit
+- [ ] Soft launch with beta users
+
+### Phase 11: Future Enhancements ⏳
 **Timeline**: Post-Launch
 
-#### Milestone 10.1: Data Management & Onboarding
+#### Milestone 11.1: Data Management & Onboarding
 - [ ] Create profile completion tracking
 - [ ] Add user onboarding checklist
 
@@ -457,7 +459,7 @@ src/
 
 ## Current Status
 
-### ✅ Completed (Phases 1-6.3)
+### ✅ Completed (Phases 1-7)
 | Phase | Status |
 |-------|--------|
 | 1. Foundation & Setup | ✅ Complete |
@@ -468,25 +470,25 @@ src/
 | 6.1 Matching Algorithm | ✅ Complete |
 | 6.2 Match Display UI | ✅ Complete |
 | 6.3 Live Chat & Messaging | ✅ Complete |
+| 7.1 Testing & Bug Fixes | ✅ Complete |
+| 7.2 UI/UX Polish | ✅ Complete |
 
-### 📍 Current: Phase 7 - Testing & Polish (In Progress)
-- [x] Unit test core components (161 tests passing)
-- [x] Fix existing test failures
-- [x] Add tests for matches & messaging components
-- [x] Performance optimization (4.4MB → 178KB largest chunk)
-- [ ] UI/UX Polish (loading skeletons, error boundaries, accessibility)
+### 📍 Next: Phase 8 - Visual Rebrand
+- [ ] Replace purple/peach palette with friendship-oriented colors
+- [ ] Replace heart icons with friendship-appropriate alternatives
+- [ ] Update copy to emphasize friendship, community, connection
 
-**Deferred (after UI polish):** Cross-browser, mobile responsiveness, E2E tests
+**Deferred from Phase 7:** Cross-browser testing, mobile responsiveness, E2E tests, accessibility (WCAG)
 
 ### 🗺️ Roadmap Preview
 | Phase | Description | Status |
 |-------|-------------|--------|
-| 7. Testing & Polish | Unit tests, cross-browser, performance | ⏳ Pending |
-| 8. Deployment & Launch | Vercel, production Supabase, domain | ⏳ Pending |
-| 8.5 Visual Rebrand | Friendship-themed colors, icons, copy | ⏳ Pending |
+| 7. Testing & Polish | Unit tests, UI polish, performance | ✅ Complete |
+| 8. Visual Rebrand | Friendship-themed colors, icons, copy | ⏳ Next |
 | 9.1 Group Chat System | Merge 1:1 chats → community groups | ⏳ Pending |
 | 9.2 AI/LLM Integration | Icebreakers, match explanations, moderation | ⏳ Pending |
 | 9.3 Chat Recommendations | LLM extracts intent → suggest places/events | ⏳ Pending |
+| 10. Deployment & Launch | Vercel, production Supabase, domain | ⏳ Pending |
 
 ### Infrastructure (see `AWS-MIGRATION-PLAN.md`)
 - **Photos:** AWS S3 + CloudFront
@@ -506,4 +508,4 @@ src/
 
 ---
 *Last Updated*: 2025-12-05
-*Status*: Phase 7 In Progress - Unit tests (161 passing) + Performance optimization complete, next: UI polish
+*Status*: Phase 7 Complete - 176 tests, UI polish done. Next: Visual Rebrand (Phase 8). Deployment moved to Phase 10.
