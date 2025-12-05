@@ -103,7 +103,8 @@ describe("MatchCard", () => {
     
     const photo = screen.getByAltText("Jane Smith's profile");
     expect(photo).toBeInTheDocument();
-    expect(photo).toHaveAttribute("src", "https://example.com/photo1.jpg");
+    // Next.js Image transforms the URL, so check it contains the original URL
+    expect(photo.getAttribute("src")).toContain(encodeURIComponent("https://example.com/photo1.jpg"));
   });
 
   test("renders photo navigation when multiple photos", () => {

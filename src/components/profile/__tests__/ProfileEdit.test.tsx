@@ -34,6 +34,17 @@ jest.mock("@/components/profile/HobbyManagement", () => ({
   ),
 }));
 
+jest.mock("@/lib/utils/zipcode-client", () => ({
+  isValidZipcode: jest.fn().mockResolvedValue(true),
+  zipcodeToLocation: jest.fn().mockResolvedValue("San Francisco, CA"),
+  validateAndNormalizeZipcode: jest.fn().mockResolvedValue({
+    zipcode: "94102",
+    latitude: 37.7749,
+    longitude: -122.4194,
+  }),
+  isValidZipcodeFormat: jest.fn().mockReturnValue(true),
+}));
+
 import { useProfileData } from "@/hooks/useProfileData";
 import { useAuthSession } from "@/hooks/useAuthSession";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";

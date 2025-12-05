@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { ChatWithDetails } from "@/hooks/useMessages";
 import { getChatDisplayName, getChatAvatar, isGroupChat } from "@/hooks/useMessages";
 import { formatDistanceToNow } from "@/lib/utils/date";
@@ -70,10 +71,12 @@ function ChatListItem({ chat, currentUserId, isSelected, onSelect }: ChatListIte
       {/* Avatar */}
       <div className="relative flex-shrink-0">
         {avatarUrl ? (
-          <img
+          <Image
             src={avatarUrl}
             alt={displayName}
-            className="h-12 w-12 rounded-full object-cover ring-2 ring-white"
+            width={48}
+            height={48}
+            className="rounded-full object-cover ring-2 ring-white"
           />
         ) : (
           <div className="h-12 w-12 rounded-full bg-gradient-to-br from-brand-100 to-peach-100 flex items-center justify-center ring-2 ring-white">

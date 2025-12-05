@@ -231,7 +231,8 @@ describe("ChatList", () => {
     );
 
     const avatar = screen.getByAltText("Jane Doe");
-    expect(avatar).toHaveAttribute("src", "https://example.com/jane.jpg");
+    // Next.js Image transforms the URL
+    expect(avatar.getAttribute("src")).toContain(encodeURIComponent("https://example.com/jane.jpg"));
   });
 
   test("displays initial when no avatar", () => {

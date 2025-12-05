@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Match } from "@/hooks/useMatches";
@@ -58,10 +59,13 @@ export function MatchCard({ match }: MatchCardProps) {
       <div className={`relative ${isExpanded ? 'aspect-[16/10]' : 'aspect-[4/5]'}`}>
         {currentPhoto ? (
           <>
-            <img
+            <Image
               src={currentPhoto.photo_url}
               alt={`${user.full_name}'s profile`}
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority={currentPhotoIndex === 0}
             />
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -216,16 +220,18 @@ export function MatchCard({ match }: MatchCardProps) {
               <button
                 key={photo.id}
                 onClick={() => setCurrentPhotoIndex(idx)}
-                className={`aspect-square overflow-hidden rounded-xl transition-all ${
+                className={`aspect-square overflow-hidden rounded-xl transition-all relative ${
                   idx === currentPhotoIndex 
                     ? 'ring-2 ring-brand-500 ring-offset-2' 
                     : 'opacity-70 hover:opacity-100'
                 }`}
               >
-                <img
+                <Image
                   src={photo.photo_url}
                   alt={`Photo ${idx + 1}`}
-                  className="h-full w-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="100px"
                 />
               </button>
             ))}

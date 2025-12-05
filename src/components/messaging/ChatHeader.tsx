@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { ChatWithDetails } from "@/hooks/useMessages";
 import { getChatDisplayName, getChatAvatar, isGroupChat } from "@/hooks/useMessages";
@@ -47,10 +48,12 @@ export function ChatHeader({ chat, currentUserId, showBackButton = false, onBack
       >
         {/* Avatar */}
         {avatarUrl ? (
-          <img
+          <Image
             src={avatarUrl}
             alt={displayName}
-            className="h-10 w-10 rounded-full object-cover ring-2 ring-white shadow-sm"
+            width={40}
+            height={40}
+            className="rounded-full object-cover ring-2 ring-white shadow-sm"
           />
         ) : (
           <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand-100 to-peach-100 flex items-center justify-center ring-2 ring-white shadow-sm">

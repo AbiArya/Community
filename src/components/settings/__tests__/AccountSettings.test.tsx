@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { AccountSettings } from "@/components/settings/AccountSettings";
 
 // Mock the hooks and dependencies
@@ -6,8 +6,8 @@ jest.mock("@/hooks/useProfileData", () => ({
   useProfileData: jest.fn(),
 }));
 
-jest.mock("@/lib/utils/zipcode", () => ({
-  zipcodeToLocation: jest.fn((zipcode: string) => {
+jest.mock("@/lib/utils/zipcode-client", () => ({
+  zipcodeToLocation: jest.fn(async (zipcode: string) => {
     if (zipcode === "94102") return "San Francisco, CA";
     if (zipcode === "10001") return "New York, NY";
     return null;
@@ -68,14 +68,19 @@ describe("AccountSettings", () => {
     expect(screen.getByText("Loading account information...")).toBeInTheDocument();
   });
 
-  test("renders account information", () => {
+  test("renders account information", async () => {
     setupProfileData();
 
     render(<AccountSettings />);
 
     expect(screen.getByDisplayValue("john@example.com")).toBeInTheDocument();
     expect(screen.getByDisplayValue("John Doe")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("San Francisco, CA")).toBeInTheDocument();
+    
+    // Wait for async location fetch
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("San Francisco, CA")).toBeInTheDocument();
+    });
+    
     expect(screen.getByText("Cannot be changed")).toBeInTheDocument();
   });
 
@@ -88,20 +93,24 @@ describe("AccountSettings", () => {
     expect(screen.getByText("To change your location, please edit your profile")).toBeInTheDocument();
   });
 
-  test("shows 'Not set' when zipcode is null", () => {
+  test("shows 'Not set' when zipcode is null", async () => {
     setupProfileData({ zipcode: null, latitude: null, longitude: null });
 
     render(<AccountSettings />);
 
-    expect(screen.getByDisplayValue("Not set")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("Not set")).toBeInTheDocument();
+    });
   });
 
-  test("shows raw zipcode as fallback when conversion fails", () => {
+  test("shows raw zipcode as fallback when conversion fails", async () => {
     // Use a zipcode that our mock doesn't recognize
     setupProfileData({ zipcode: "99999" });
 
     render(<AccountSettings />);
 
-    expect(screen.getByDisplayValue("99999")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("99999")).toBeInTheDocument();
+    });
   });
 });

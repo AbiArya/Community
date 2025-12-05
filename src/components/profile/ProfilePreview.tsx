@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useProfileData } from "@/hooks/useProfileData";
 
 export function ProfilePreview() {
@@ -51,10 +52,13 @@ export function ProfilePreview() {
         {/* Primary Photo */}
         {primaryPhoto ? (
           <div className="aspect-[4/5] relative">
-            <img
+            <Image
               src={primaryPhoto.photo_url}
               alt={`${profile.full_name}'s profile`}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 448px) 100vw, 448px"
+              priority
             />
             {/* Photo indicators */}
             {sortedPhotos.length > 1 && (
@@ -135,11 +139,13 @@ export function ProfilePreview() {
               <h4 className="font-medium text-sm text-gray-700 mb-2">More Photos</h4>
               <div className="grid grid-cols-2 gap-2">
                 {otherPhotos.slice(0, 2).map((photo) => (
-                  <div key={photo.id} className="aspect-square">
-                    <img
+                  <div key={photo.id} className="aspect-square relative">
+                    <Image
                       src={photo.photo_url}
                       alt="Additional photo"
-                      className="w-full h-full object-cover rounded-lg"
+                      fill
+                      className="object-cover rounded-lg"
+                      sizes="(max-width: 448px) 50vw, 200px"
                     />
                   </div>
                 ))}

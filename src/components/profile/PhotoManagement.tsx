@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useRef, useCallback } from "react";
 import { useDragReorder } from "@/hooks/useDragReorder";
 import type { UserPhoto } from "@/hooks/useProfileData";
@@ -162,18 +163,31 @@ export function PhotoManagement({ photos, onPhotoChange, error: externalError }:
                   )}`}
                 >
                   <div className="aspect-square bg-gray-50 relative">
-                    <img
-                      src={photoUrl}
-                      alt={photo.is_primary ? "Primary photo" : "Profile photo"}
-                      className="w-full h-full object-cover pointer-events-none"
-                    />
+                    {isPending ? (
+                      // Pending photos use blob URLs which can't use Next.js Image
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={photoUrl}
+                        alt={photo.is_primary ? "Primary photo" : "Profile photo"}
+                        className="w-full h-full object-cover pointer-events-none"
+                      />
+                    ) : (
+                      // Existing photos from CloudFront use optimized Next.js Image
+                      <Image
+                        src={photoUrl}
+                        alt={photo.is_primary ? "Primary photo" : "Profile photo"}
+                        fill
+                        className="object-cover pointer-events-none"
+                        sizes="(max-width: 640px) 100vw, 33vw"
+                      />
+                    )}
                     {photo.is_primary && (
-                      <div className="absolute top-2 left-2 bg-black text-white px-2 py-1 rounded text-xs font-medium">
+                      <div className="absolute top-2 left-2 bg-black text-white px-2 py-1 rounded text-xs font-medium z-10">
                         ★ Primary
                       </div>
                     )}
                     {isPending && (
-                      <div className="absolute top-2 left-2 bg-orange-600 text-white px-2 py-1 rounded text-xs font-medium">
+                      <div className="absolute top-2 left-2 bg-orange-600 text-white px-2 py-1 rounded text-xs font-medium z-10">
                         New
                       </div>
                     )}

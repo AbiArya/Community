@@ -235,7 +235,8 @@ describe("MessageThread", () => {
     );
 
     const image = screen.getByAltText("Shared image");
-    expect(image).toHaveAttribute("src", "https://example.com/image.jpg");
+    // Next.js Image transforms the URL
+    expect(image.getAttribute("src")).toContain(encodeURIComponent("https://example.com/image.jpg"));
   });
 
   test("groups messages by sender", () => {
