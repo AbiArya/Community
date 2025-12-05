@@ -12,7 +12,7 @@ export interface RankedHobby {
 interface Hobby {
   id: string;
   name: string;
-  category: string;
+  category: string | null;
 }
 
 interface HobbySelectorProps {

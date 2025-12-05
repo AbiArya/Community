@@ -163,10 +163,10 @@ export function ProfileView() {
                   {index + 1}
                 </span>
                 <span className="rounded-full bg-sand-100 px-3 py-1 text-sm text-ink-900">
-                  {userHobby.hobby.name}
+                  {userHobby.hobby?.name}
                 </span>
                 <span className="text-xs text-ink-500">
-                  {userHobby.hobby.category}
+                  {userHobby.hobby?.category}
                 </span>
               </div>
             ))}

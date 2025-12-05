@@ -21,8 +21,17 @@ describe("EmailAuthForm", () => {
     render(<EmailAuthForm mode="login" />);
     const input = screen.getByPlaceholderText("you@example.com");
     fireEvent.change(input, { target: { value: "test@example.com" } });
-    fireEvent.click(screen.getByRole("button", { name: /send link/i }));
+    // Button text is "Sign in" for login mode
+    fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
     await waitFor(() => expect(screen.getByRole("status")).toBeInTheDocument());
+  });
+
+  test("renders signup mode correctly", async () => {
+    render(<EmailAuthForm mode="signup" />);
+    const input = screen.getByPlaceholderText("you@example.com");
+    fireEvent.change(input, { target: { value: "new@example.com" } });
+    // Button text is "Create account" for signup mode
+    expect(screen.getByRole("button", { name: /create account/i })).toBeInTheDocument();
   });
 });
 

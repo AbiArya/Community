@@ -8,14 +8,14 @@ import { useProfileData } from "@/hooks/useProfileData";
 interface Hobby {
   id: string;
   name: string;
-  category: string;
+  category: string | null;
 }
 
 interface UserHobby {
   id: string;
-  hobby_id: string;
+  hobby_id: string | null;
   preference_rank: number;
-  hobby: Hobby;
+  hobby: Hobby | null;
 }
 
 interface HobbyManagementProps {
@@ -250,8 +250,8 @@ export function HobbyManagement({ onUpdate, onHobbiesChange }: HobbyManagementPr
                       {index + 1}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <div className="font-medium truncate">{userHobby.hobby.name}</div>
-                      <div className="text-sm text-gray-500 truncate">{userHobby.hobby.category}</div>
+                      <div className="font-medium truncate">{userHobby.hobby?.name}</div>
+                      <div className="text-sm text-gray-500 truncate">{userHobby.hobby?.category}</div>
                     </div>
                   </div>
                 </div>

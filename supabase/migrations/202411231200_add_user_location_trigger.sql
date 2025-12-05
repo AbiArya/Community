@@ -34,3 +34,5 @@ EXECUTE FUNCTION public.handle_user_location_point_sync();
 
 
 
+
+

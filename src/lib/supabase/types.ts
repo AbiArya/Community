@@ -500,6 +500,50 @@ export type Database = {
         Args: { p_chat_id: string }
         Returns: number
       }
+      get_user_match_profile: {
+        Args: { p_user_id: string }
+        Returns: Array<{
+          user_id: string
+          full_name: string
+          age: number
+          zipcode: string
+          latitude: number
+          longitude: number
+          last_active: string
+          distance_radius: number
+          age_range_min: number
+          age_range_max: number
+          match_frequency: number
+        }>
+      }
+      get_match_candidates: {
+        Args: {
+          p_user_id: string
+          p_longitude: number
+          p_latitude: number
+          p_radius_meters?: number
+          p_age_min?: number
+          p_age_max?: number
+        }
+        Returns: Array<{
+          user_id: string
+          full_name: string
+          age: number
+          zipcode: string
+          latitude: number
+          longitude: number
+          last_active: string
+          distance_km: number
+        }>
+      }
+      check_existing_match: {
+        Args: {
+          p_user_1_id: string
+          p_user_2_id: string
+          p_match_week?: string
+        }
+        Returns: boolean
+      }
       _postgis_deprecate: {
         Args: { newname: string; oldname: string; version: string }
         Returns: undefined

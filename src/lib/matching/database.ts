@@ -151,9 +151,9 @@ export async function fetchExistingMatches(
     const matchedUserIds = new Set<string>();
     
     matches?.forEach(match => {
-      if (match.user_1_id === userId) {
+      if (match.user_1_id === userId && match.user_2_id) {
         matchedUserIds.add(match.user_2_id);
-      } else {
+      } else if (match.user_1_id) {
         matchedUserIds.add(match.user_1_id);
       }
     });
@@ -192,7 +192,15 @@ export async function fetchRecentMatches(
       throw error;
     }
 
-    return matches || [];
+    // Filter out matches with null values and map to StoredMatch type
+    return (matches || [])
+      .filter(m => m.user_1_id && m.user_2_id && m.similarity_score !== null && m.match_week)
+      .map(m => ({
+        user_1_id: m.user_1_id!,
+        user_2_id: m.user_2_id!,
+        similarity_score: m.similarity_score!,
+        match_week: m.match_week!
+      }));
 
   } catch (error) {
     console.error('Failed to fetch recent matches:', error);
@@ -280,8 +288,8 @@ export async function fetchUsersNeedingMatches(
     // Build set of users who already have matches this week
     const usersWithMatches = new Set<string>();
     existingMatches?.forEach(match => {
-      usersWithMatches.add(match.user_1_id);
-      usersWithMatches.add(match.user_2_id);
+      if (match.user_1_id) usersWithMatches.add(match.user_1_id);
+      if (match.user_2_id) usersWithMatches.add(match.user_2_id);
     });
 
     // Return users who don't have matches yet

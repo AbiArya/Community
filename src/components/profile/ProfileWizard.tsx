@@ -67,6 +67,10 @@ export function ProfileWizard() {
         .select("*")
         .eq("id", session.user.id)
         .maybeSingle();
+      
+      if (fetchError) {
+        throw new Error(`Failed to fetch user data: ${fetchError.message}`);
+      }
         
       let data, error;
       
@@ -93,8 +97,6 @@ export function ProfileWizard() {
           
         data = insertResult;
         error = insertError;
-      } else if (fetchError) {
-        throw new Error(`Failed to fetch user data: ${fetchError.message}`);
       } else {
         // User exists, update them
         const { data: updateData, error: updateError } = await supabase
