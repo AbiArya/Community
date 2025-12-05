@@ -1,10 +1,12 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 import { useProfileData } from "@/hooks/useProfileData";
 
 export function ProfilePreview() {
   const { data: profile, isLoading, error } = useProfileData();
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
   if (isLoading) {
     return (
@@ -38,7 +40,20 @@ export function ProfilePreview() {
 
   const sortedPhotos = [...profile.photos].sort((a, b) => a.display_order - b.display_order);
   const primaryPhoto = sortedPhotos.find(p => p.is_primary) || sortedPhotos[0];
+  const currentPhoto = sortedPhotos[currentPhotoIndex] || primaryPhoto;
   const otherPhotos = sortedPhotos.filter(p => p.id !== primaryPhoto?.id);
+
+  const nextPhoto = () => {
+    if (sortedPhotos.length > 1) {
+      setCurrentPhotoIndex((prev) => (prev + 1) % sortedPhotos.length);
+    }
+  };
+
+  const prevPhoto = () => {
+    if (sortedPhotos.length > 1) {
+      setCurrentPhotoIndex((prev) => (prev - 1 + sortedPhotos.length) % sortedPhotos.length);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -50,28 +65,53 @@ export function ProfilePreview() {
       {/* Profile Card - Similar to match cards */}
       <div className="max-w-md mx-auto bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden">
         {/* Primary Photo */}
-        {primaryPhoto ? (
-          <div className="aspect-[4/5] relative">
+        {currentPhoto ? (
+          <div className="aspect-[4/5] relative group">
             <Image
-              src={primaryPhoto.photo_url}
+              src={currentPhoto.photo_url}
               alt={`${profile.full_name}'s profile`}
               fill
               className="object-cover"
               sizes="(max-width: 448px) 100vw, 448px"
               priority
             />
-            {/* Photo indicators */}
+            {/* Photo navigation */}
             {sortedPhotos.length > 1 && (
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-1">
-                {sortedPhotos.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`w-2 h-2 rounded-full ${
-                      index === 0 ? 'bg-white' : 'bg-white/50'
-                    }`}
-                  />
-                ))}
-              </div>
+              <>
+                <button
+                  onClick={prevPhoto}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/20 backdrop-blur-sm text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/30"
+                  aria-label="Previous photo"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={nextPhoto}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/20 backdrop-blur-sm text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/30"
+                  aria-label="Next photo"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+                {/* Photo indicators */}
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-1.5">
+                  {sortedPhotos.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentPhotoIndex(index)}
+                      className={`h-2 rounded-full transition-all ${
+                        index === currentPhotoIndex 
+                          ? 'w-6 bg-white' 
+                          : 'w-2 bg-white/50 hover:bg-white/70'
+                      }`}
+                      aria-label={`View photo ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
             )}
           </div>
         ) : (
