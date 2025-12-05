@@ -7,6 +7,7 @@ import { AccountSettings } from "@/components/settings/AccountSettings";
 import { MatchingPreferences } from "@/components/settings/MatchingPreferences";
 import { AccountDeletion } from "@/components/settings/AccountDeletion";
 import { ProfileDataProvider, useProfileData } from "@/hooks/useProfileData";
+import { SkeletonSettings } from "@/components/ui/Skeleton";
 
 export default function SettingsPage() {
   return (
@@ -36,10 +37,7 @@ function SettingsPageContent() {
     return (
       <div className="min-h-screen py-8">
         <div className="mx-auto max-w-4xl px-4">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 w-1/3 rounded bg-ink-200"></div>
-            <div className="h-4 w-1/2 rounded bg-ink-200"></div>
-          </div>
+          <SkeletonSettings />
         </div>
       </div>
     );
