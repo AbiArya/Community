@@ -206,10 +206,10 @@ export function ProfileView() {
             <span className="font-medium text-ink-600">Last updated:</span>
             <p className="text-ink-900">{new Date(profile.updated_at).toLocaleDateString()}</p>
           </div>
-          {profile.location && (
+          {profile.zipcode && (
             <div>
-              <span className="font-medium text-ink-600">Location:</span>
-              <p className="text-ink-900">{profile.location}</p>
+              <span className="font-medium text-ink-600">Zipcode:</span>
+              <p className="text-ink-900">{profile.zipcode}</p>
             </div>
           )}
           {profile.age && (

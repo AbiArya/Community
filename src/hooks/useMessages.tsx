@@ -78,6 +78,7 @@ export function MessagesProvider({ children }: { children: ReactNode }) {
   }, [supabase]);
 
   // Load all chats for the current user
+  // Uses optimized DB function to fetch all data in a single query
   const loadChats = useCallback(async () => {
     if (!currentUserId) return;
     
@@ -85,69 +86,14 @@ export function MessagesProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
-      // Get all chats where user is an active member
-      const { data: membershipData, error: memberError } = await supabase
-        .from("chat_members")
-        .select(`
-          chat_id,
-          chats!inner(*)
-        `)
-        .eq("user_id", currentUserId)
-        .is("left_at", null);
+      // Single optimized query replaces N+1 pattern (was 41+ queries for 10 chats)
+      const { data, error: rpcError } = await supabase
+        .rpc("get_user_chats_with_details", { p_user_id: currentUserId });
 
-      if (memberError) throw memberError;
+      if (rpcError) throw rpcError;
 
-      const enrichedChats: ChatWithDetails[] = [];
-      
-      for (const membership of membershipData || []) {
-        const chat = membership.chats as unknown as Chat;
-        
-        // Get all members of this chat with their user details
-        const { data: membersData } = await supabase
-          .from("chat_members")
-          .select(`
-            *,
-            user:users!chat_members_user_id_fkey(id, full_name)
-          `)
-          .eq("chat_id", chat.id)
-          .is("left_at", null);
-
-        // Get photos for each member
-        const membersWithPhotos: ChatMemberWithUser[] = [];
-        for (const member of membersData || []) {
-          const { data: photoData } = await supabase
-            .from("user_photos")
-            .select("photo_url, is_primary")
-            .eq("user_id", member.user_id)
-            .order("display_order", { ascending: true })
-            .limit(1);
-
-          membersWithPhotos.push({
-            ...member,
-            user: member.user ? {
-              ...member.user,
-              photos: photoData || []
-            } : null
-          });
-        }
-
-        // Get unread count for this chat
-        const { data: unreadData } = await supabase
-          .rpc("get_chat_unread_count", { p_chat_id: chat.id });
-
-        enrichedChats.push({
-          ...chat,
-          members: membersWithPhotos,
-          unread_count: typeof unreadData === "number" ? unreadData : 0
-        });
-      }
-
-      // Sort by last message time
-      enrichedChats.sort((a, b) => {
-        const aTime = a.last_message_at ? new Date(a.last_message_at).getTime() : 0;
-        const bTime = b.last_message_at ? new Date(b.last_message_at).getTime() : 0;
-        return bTime - aTime;
-      });
+      // Data is already sorted by last_message_at DESC in the function
+      const enrichedChats: ChatWithDetails[] = (data || []) as ChatWithDetails[];
 
       setChats(enrichedChats);
       
@@ -175,48 +121,14 @@ export function MessagesProvider({ children }: { children: ReactNode }) {
       let chat = chats.find(c => c.id === chatId);
       
       if (!chat) {
-        // Fetch the chat details
-        const { data: chatData, error: chatError } = await supabase
-          .from("chats")
-          .select("*")
-          .eq("id", chatId)
-          .single();
+        // Use optimized function to fetch chat with all details in one query
+        const { data, error: rpcError } = await supabase
+          .rpc("get_chat_details", { p_chat_id: chatId, p_user_id: currentUserId });
         
-        if (chatError) throw chatError;
+        if (rpcError) throw rpcError;
+        if (!data) throw new Error("Chat not found");
 
-        // Get members
-        const { data: membersData } = await supabase
-          .from("chat_members")
-          .select(`
-            *,
-            user:users!chat_members_user_id_fkey(id, full_name)
-          `)
-          .eq("chat_id", chatId)
-          .is("left_at", null);
-
-        const membersWithPhotos: ChatMemberWithUser[] = [];
-        for (const member of membersData || []) {
-          const { data: photoData } = await supabase
-            .from("user_photos")
-            .select("photo_url, is_primary")
-            .eq("user_id", member.user_id)
-            .order("display_order", { ascending: true })
-            .limit(1);
-
-          membersWithPhotos.push({
-            ...member,
-            user: member.user ? {
-              ...member.user,
-              photos: photoData || []
-            } : null
-          });
-        }
-
-        chat = {
-          ...chatData,
-          members: membersWithPhotos,
-          unread_count: 0
-        };
+        chat = data as ChatWithDetails;
       }
 
       setCurrentChat(chat);

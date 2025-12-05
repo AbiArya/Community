@@ -95,8 +95,8 @@ export function ProfilePreview() {
             {profile.age && (
               <p className="text-gray-600">{profile.age} years old</p>
             )}
-            {profile.location && (
-              <p className="text-sm text-gray-500">{profile.location}</p>
+            {profile.zipcode && (
+              <p className="text-sm text-gray-500">📍 {profile.zipcode}</p>
             )}
           </div>
 

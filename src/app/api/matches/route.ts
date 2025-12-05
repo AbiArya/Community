@@ -8,6 +8,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 /**
  * GET /api/matches
  * Fetches the current user's matches with full profile data
+ * Uses optimized DB function to fetch all data in a single query
  */
 export async function GET(request: NextRequest) {
   try {
@@ -31,119 +32,25 @@ export async function GET(request: NextRequest) {
 
     const userId = user.id;
 
-    // Fetch matches where user is either user_1 or user_2
-    const { data: matches, error: matchesError } = await supabase
-      .from('matches')
-      .select('*')
-      .or(`user_1_id.eq.${userId},user_2_id.eq.${userId}`)
-      .order('created_at', { ascending: false });
+    // Single optimized query replaces 4 sequential queries
+    const { data: enrichedMatches, error: rpcError } = await supabase
+      .rpc('get_user_matches_enriched', { p_user_id: userId });
 
-    if (matchesError) {
-      console.error('Error fetching matches:', matchesError);
+    if (rpcError) {
+      console.error('Error fetching matches:', rpcError);
       return NextResponse.json({ error: 'Failed to fetch matches' }, { status: 500 });
     }
 
-    if (!matches || matches.length === 0) {
+    const matches = (enrichedMatches || []) as EnrichedMatch[];
+
+    if (matches.length === 0) {
       return NextResponse.json({ matches: [], stats: getEmptyStats() });
     }
 
-    // Get matched user IDs
-    const matchedUserIds = matches.map(match => 
-      match.user_1_id === userId ? match.user_2_id : match.user_1_id
-    ).filter(Boolean) as string[];
-
-    // Fetch matched users' profiles
-    const { data: users, error: usersError } = await supabase
-      .from('users')
-      .select('id, full_name, age, bio, location, zipcode')
-      .in('id', matchedUserIds);
-
-    if (usersError) {
-      console.error('Error fetching users:', usersError);
-      return NextResponse.json({ error: 'Failed to fetch user data' }, { status: 500 });
-    }
-
-    // Fetch photos for matched users
-    const { data: photos, error: photosError } = await supabase
-      .from('user_photos')
-      .select('id, user_id, photo_url, display_order, is_primary')
-      .in('user_id', matchedUserIds)
-      .order('display_order', { ascending: true });
-
-    if (photosError) {
-      console.error('Error fetching photos:', photosError);
-    }
-
-    // Fetch hobbies for matched users
-    const { data: userHobbies, error: hobbiesError } = await supabase
-      .from('user_hobbies')
-      .select(`
-        id,
-        user_id,
-        preference_rank,
-        hobby_id,
-        hobbies:hobby_id (
-          id,
-          name,
-          category
-        )
-      `)
-      .in('user_id', matchedUserIds)
-      .order('preference_rank', { ascending: true });
-
-    if (hobbiesError) {
-      console.error('Error fetching hobbies:', hobbiesError);
-    }
-
-    // Group data by user
-    const userMap = new Map<string, {
-      profile: typeof users[0];
-      photos: typeof photos;
-      hobbies: typeof userHobbies;
-    }>();
-
-    users?.forEach(user => {
-      userMap.set(user.id, {
-        profile: user,
-        photos: photos?.filter(p => p.user_id === user.id) || [],
-        hobbies: userHobbies?.filter(h => h.user_id === user.id) || []
-      });
-    });
-
-    // Build enriched matches
-    const enrichedMatches = matches.map(match => {
-      const isUser1 = match.user_1_id === userId;
-      const matchedUserId = isUser1 ? match.user_2_id : match.user_1_id;
-      const isViewed = isUser1 ? match.is_viewed_by_user_1 : match.is_viewed_by_user_2;
-      const userData = matchedUserId ? userMap.get(matchedUserId) : null;
-
-      return {
-        id: match.id,
-        match_week: match.match_week,
-        similarity_score: match.similarity_score,
-        created_at: match.created_at,
-        is_viewed: isViewed,
-        matched_user: userData ? {
-          id: matchedUserId,
-          full_name: userData.profile.full_name,
-          age: userData.profile.age,
-          bio: userData.profile.bio,
-          location: userData.profile.location,
-          zipcode: userData.profile.zipcode,
-          photos: userData.photos || [],
-          hobbies: (userData.hobbies || []).map(h => ({
-            id: h.id,
-            preference_rank: h.preference_rank,
-            hobby: h.hobbies
-          }))
-        } : null
-      };
-    }).filter(m => m.matched_user !== null) as EnrichedMatch[];
-
     // Calculate stats
-    const stats = calculateStats(enrichedMatches);
+    const stats = calculateStats(matches);
 
-    return NextResponse.json({ matches: enrichedMatches, stats });
+    return NextResponse.json({ matches, stats });
 
   } catch (error) {
     console.error('API error:', error);
