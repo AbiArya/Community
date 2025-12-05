@@ -40,8 +40,9 @@ describe("PhotoManagement", () => {
     
     const images = screen.getAllByRole("img");
     expect(images).toHaveLength(2);
-    expect(images[0]).toHaveAttribute("src", "https://example.com/photo1.jpg");
-    expect(images[1]).toHaveAttribute("src", "https://example.com/photo2.jpg");
+    // Next.js Image transforms the URL
+    expect(images[0].getAttribute("src")).toContain(encodeURIComponent("https://example.com/photo1.jpg"));
+    expect(images[1].getAttribute("src")).toContain(encodeURIComponent("https://example.com/photo2.jpg"));
   });
 
   test("shows primary photo badge", () => {

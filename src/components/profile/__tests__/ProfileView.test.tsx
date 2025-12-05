@@ -181,7 +181,8 @@ describe("ProfileView", () => {
     
     const photo = screen.getByAltText("Profile photo 0");
     expect(photo).toBeInTheDocument();
-    expect(photo).toHaveAttribute("src", "https://example.com/photo1.jpg");
+    // Next.js Image transforms the URL
+    expect(photo.getAttribute("src")).toContain(encodeURIComponent("https://example.com/photo1.jpg"));
     expect(screen.getByText("Primary")).toBeInTheDocument();
   });
 

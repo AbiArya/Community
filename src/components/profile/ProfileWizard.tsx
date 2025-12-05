@@ -8,7 +8,7 @@ import { PreferencesStep } from "@/components/profile/PreferencesStep";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useAuthSession } from "@/hooks/useAuthSession";
 import { useRouter } from "next/navigation";
-import { validateAndNormalizeZipcode } from "@/lib/utils/zipcode";
+import { validateAndNormalizeZipcode } from "@/lib/utils/zipcode-client";
 import { uploadPhotoToS3 } from "@/lib/aws/storage-client";
 import { clearProfileCache } from "@/hooks/useProfileData";
 

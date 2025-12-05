@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useProfileData } from "@/hooks/useProfileData";
 import { useState } from "react";
 import { ProfileEdit } from "./ProfileEdit";
@@ -121,14 +122,16 @@ export function ProfileView() {
         {profile.photos.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {profile.photos.map((photo) => (
-              <div key={photo.id} className="relative">
-                <img
+              <div key={photo.id} className="relative h-48">
+                <Image
                   src={photo.photo_url}
                   alt={`Profile photo ${photo.display_order}`}
-                  className="h-48 w-full rounded-2xl object-cover shadow-md"
+                  fill
+                  className="rounded-2xl object-cover shadow-md"
+                  sizes="(max-width: 768px) 100vw, 33vw"
                 />
                 {photo.is_primary && (
-                  <span className="absolute left-2 top-2 rounded-full bg-brand-600 px-2 py-1 text-xs text-white shadow-md">
+                  <span className="absolute left-2 top-2 rounded-full bg-brand-600 px-2 py-1 text-xs text-white shadow-md z-10">
                     Primary
                   </span>
                 )}

@@ -1,12 +1,12 @@
 "use client";
 
 import { useProfileData, type UserHobby, type UserPhoto } from "@/hooks/useProfileData";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useAuthSession } from "@/hooks/useAuthSession";
 import { PhotoManagement, type PendingPhoto, type PhotoOperation } from "./PhotoManagement";
 import { HobbyManagement } from "./HobbyManagement";
-import { validateAndNormalizeZipcode, zipcodeToLocation, isValidZipcode } from "@/lib/utils/zipcode";
+import { validateAndNormalizeZipcode, zipcodeToLocation, isValidZipcode, isValidZipcodeFormat } from "@/lib/utils/zipcode-client";
 import { uploadPhotoToS3, deletePhotosFromS3 } from "@/lib/aws/storage-client";
 
 interface ProfileEditProps {
@@ -65,10 +65,11 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
       
       // Show location for existing zipcode
       if (profile.zipcode) {
-        const location = zipcodeToLocation(profile.zipcode);
-        if (location) {
-          setLocationDisplay(location);
-        }
+        zipcodeToLocation(profile.zipcode).then(location => {
+          if (location) {
+            setLocationDisplay(location);
+          }
+        });
       }
     }
   }, [profile]);
@@ -86,7 +87,9 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
     }
   };
   
-  const validateZipcode = () => {
+  const [isValidatingZipcode, setIsValidatingZipcode] = useState(false);
+  
+  const validateZipcode = useCallback(async (): Promise<boolean> => {
     const zip = formData.zipcode.trim();
     if (!zip) {
       setZipcodeError("Zipcode is required");
@@ -94,21 +97,35 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
       return false;
     }
     
-    if (!isValidZipcode(zip)) {
+    // Quick format check first (synchronous)
+    if (!isValidZipcodeFormat(zip)) {
       setZipcodeError("Please enter a valid US zipcode");
       setLocationDisplay("");
       return false;
     }
     
-    // Show location for valid zipcode
-    const location = zipcodeToLocation(zip);
-    if (location) {
-      setLocationDisplay(location);
-    }
+    setIsValidatingZipcode(true);
     
-    setZipcodeError("");
-    return true;
-  };
+    try {
+      const valid = await isValidZipcode(zip);
+      if (!valid) {
+        setZipcodeError("Please enter a valid US zipcode");
+        setLocationDisplay("");
+        return false;
+      }
+      
+      // Show location for valid zipcode
+      const location = await zipcodeToLocation(zip);
+      if (location) {
+        setLocationDisplay(location);
+      }
+      
+      setZipcodeError("");
+      return true;
+    } finally {
+      setIsValidatingZipcode(false);
+    }
+  }, [formData.zipcode]);
 
   const handleNumberInputChange = (field: string, value: string) => {
     const trimmed = value.trim();
@@ -173,7 +190,8 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
     if (!session || !profile) return;
 
     // Validate zipcode before saving
-    if (!validateZipcode()) {
+    const isZipcodeValid = await validateZipcode();
+    if (!isZipcodeValid) {
       setSaveError("Please enter a valid zipcode");
       return;
     }
@@ -187,7 +205,7 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
       const supabase = getSupabaseBrowserClient();
       
       // Validate and convert zipcode to coordinates
-      const { zipcode, latitude, longitude } = validateAndNormalizeZipcode(formData.zipcode);
+      const { zipcode, latitude, longitude } = await validateAndNormalizeZipcode(formData.zipcode);
 
       // Prepare update data
       const updateData: {
@@ -567,10 +585,13 @@ export function ProfileEdit({ onSaveSuccess }: ProfileEditProps = {}) {
             maxLength={10}
             autoComplete="postal-code"
           />
-          {zipcodeError && (
+          {isValidatingZipcode && (
+            <p className="text-xs text-gray-500 mt-1">Validating...</p>
+          )}
+          {zipcodeError && !isValidatingZipcode && (
             <p className="text-xs text-red-600 mt-1">{zipcodeError}</p>
           )}
-          {locationDisplay && !zipcodeError && (
+          {locationDisplay && !zipcodeError && !isValidatingZipcode && (
             <p className="text-xs text-green-600 mt-1">✓ {locationDisplay}</p>
           )}
           <p className="text-xs text-gray-500 mt-1">

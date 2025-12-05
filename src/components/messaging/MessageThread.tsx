@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef } from "react";
 import type { MessageWithSender, ChatWithDetails } from "@/hooks/useMessages";
 import { getChatDisplayName, getChatAvatar } from "@/hooks/useMessages";
@@ -161,10 +162,12 @@ function MessageBubble({ message, isOwn, showAvatar, senderName, senderPhoto }: 
       <div className="w-8 flex-shrink-0">
         {showAvatar && !isOwn && (
           senderPhoto ? (
-            <img
+            <Image
               src={senderPhoto}
               alt={senderName || "User"}
-              className="w-8 h-8 rounded-full object-cover"
+              width={32}
+              height={32}
+              className="rounded-full object-cover"
             />
           ) : (
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-100 to-peach-100 flex items-center justify-center">
@@ -186,10 +189,14 @@ function MessageBubble({ message, isOwn, showAvatar, senderName, senderPhoto }: 
           }`}
         >
           {message.message_type === "image" ? (
-            <img 
+            // Image messages use CloudFront URLs when implemented
+            <Image 
               src={message.content} 
               alt="Shared image" 
+              width={300}
+              height={200}
               className="max-w-full rounded-lg"
+              style={{ width: 'auto', height: 'auto' }}
             />
           ) : (
             <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">

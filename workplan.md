@@ -162,15 +162,20 @@ Phase 6.3 (Messaging) is complete! Users can now chat with matches in real-time 
 #### Milestone 7.1: Testing & Bug Fixes
 - [x] Unit test core components (161 tests passing - auth, profile, settings, matches, messaging)
 - [x] Test matching algorithm accuracy (comprehensive algorithm tests)
-- [ ] Integration test auth flow (E2E)
+- [x] Performance optimization:
+  - [x] Moved zipcodes database (4.4MB) to server-side API route (96% bundle reduction)
+  - [x] Replaced raw `<img>` with Next.js `<Image>` in 8 components
+  - [x] Configured bundle analyzer for future monitoring
+
+**Deferred (test after UI polish complete):**
 - [ ] Cross-browser compatibility testing
 - [ ] Mobile responsiveness testing
-- [ ] Performance optimization
+- [ ] Integration test auth flow (E2E with Cypress)
 
 #### Milestone 7.2: UI/UX Polish
 - [ ] Implement loading skeletons
 - [ ] Add micro-interactions
-- [ ] Optimize image loading
+- [x] Optimize image loading (Next.js Image)
 - [ ] Add error boundaries
 - [ ] Improve accessibility (WCAG compliance)
 
@@ -468,9 +473,10 @@ src/
 - [x] Unit test core components (161 tests passing)
 - [x] Fix existing test failures
 - [x] Add tests for matches & messaging components
-- [ ] Integration test auth flow (E2E with Cypress)
-- [ ] Cross-browser compatibility
-- [ ] Performance optimization
+- [x] Performance optimization (4.4MB → 178KB largest chunk)
+- [ ] UI/UX Polish (loading skeletons, error boundaries, accessibility)
+
+**Deferred (after UI polish):** Cross-browser, mobile responsiveness, E2E tests
 
 ### 🗺️ Roadmap Preview
 | Phase | Description | Status |
@@ -499,5 +505,5 @@ src/
 - Average session duration > 5 minutes
 
 ---
-*Last Updated*: 2025-12-04
-*Status*: Phase 7 In Progress - Unit tests complete (161 passing), ready for E2E & polish
+*Last Updated*: 2025-12-05
+*Status*: Phase 7 In Progress - Unit tests (161 passing) + Performance optimization complete, next: UI polish

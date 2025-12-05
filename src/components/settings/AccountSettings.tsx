@@ -1,10 +1,23 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useProfileData } from "@/hooks/useProfileData";
-import { zipcodeToLocation } from "@/lib/utils/zipcode";
+import { zipcodeToLocation } from "@/lib/utils/zipcode-client";
 
 export function AccountSettings() {
   const { data: profileData } = useProfileData();
+  const [locationDisplay, setLocationDisplay] = useState<string>("");
+
+  // Fetch location display when zipcode changes
+  useEffect(() => {
+    if (profileData?.zipcode) {
+      zipcodeToLocation(profileData.zipcode).then(location => {
+        setLocationDisplay(location || profileData.zipcode);
+      });
+    } else {
+      setLocationDisplay("Not set");
+    }
+  }, [profileData?.zipcode]);
 
   if (!profileData) {
     return <div className="text-sm text-gray-500">Loading account information...</div>;
@@ -45,11 +58,7 @@ export function AccountSettings() {
         <label className="block text-sm font-medium text-ink-700 mb-1">Location</label>
         <input
           type="text"
-          value={
-            profileData.zipcode
-              ? zipcodeToLocation(profileData.zipcode) || profileData.zipcode
-              : "Not set"
-          }
+          value={locationDisplay}
           disabled
           className="input-base"
         />

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { isValidZipcode, zipcodeToLocation } from "@/lib/utils/zipcode";
+import { useState, useCallback } from "react";
+import { isValidZipcode, zipcodeToLocation, isValidZipcodeFormat } from "@/lib/utils/zipcode-client";
 
 interface Preferences {
   zipcode: string;
@@ -31,6 +31,7 @@ export function PreferencesStep({ value, onChange }: PreferencesStepProps) {
   });
   const [zipcodeError, setZipcodeError] = useState<string>("");
   const [locationDisplay, setLocationDisplay] = useState<string>("");
+  const [isValidating, setIsValidating] = useState(false);
 
   function updateLocal<K extends keyof PreferencesStepState>(key: K, v: PreferencesStepState[K]) {
     setLocalState(prev => ({ ...prev, [key]: v }));
@@ -42,7 +43,7 @@ export function PreferencesStep({ value, onChange }: PreferencesStepProps) {
     }
   }
 
-  function validateZipcode() {
+  const validateZipcode = useCallback(async (): Promise<boolean> => {
     const zip = localState.zipcode.trim();
     if (!zip) {
       setZipcodeError("Zipcode is required");
@@ -50,24 +51,38 @@ export function PreferencesStep({ value, onChange }: PreferencesStepProps) {
       return false;
     }
     
-    if (!isValidZipcode(zip)) {
+    // Quick format check first (synchronous)
+    if (!isValidZipcodeFormat(zip)) {
       setZipcodeError("Please enter a valid US zipcode");
       setLocationDisplay("");
       return false;
     }
     
-    // Show location for valid zipcode
-    const location = zipcodeToLocation(zip);
-    if (location) {
-      setLocationDisplay(location);
-    }
+    setIsValidating(true);
     
-    setZipcodeError("");
-    return true;
-  }
+    try {
+      const valid = await isValidZipcode(zip);
+      if (!valid) {
+        setZipcodeError("Please enter a valid US zipcode");
+        setLocationDisplay("");
+        return false;
+      }
+      
+      // Show location for valid zipcode
+      const location = await zipcodeToLocation(zip);
+      if (location) {
+        setLocationDisplay(location);
+      }
+      
+      setZipcodeError("");
+      return true;
+    } finally {
+      setIsValidating(false);
+    }
+  }, [localState.zipcode]);
 
-  function syncToParent() {
-    const isZipcodeValid = validateZipcode();
+  const syncToParent = useCallback(async () => {
+    const isZipcodeValid = await validateZipcode();
     
     const newValue = {
       zipcode: localState.zipcode.trim(),
@@ -80,7 +95,7 @@ export function PreferencesStep({ value, onChange }: PreferencesStepProps) {
     if (isZipcodeValid) {
       onChange(newValue);
     }
-  }
+  }, [localState, onChange, validateZipcode]);
 
   return (
     <div className="space-y-4">
@@ -108,10 +123,13 @@ export function PreferencesStep({ value, onChange }: PreferencesStepProps) {
             maxLength={10}
             autoComplete="postal-code"
           />
-          {zipcodeError && (
+          {isValidating && (
+            <span className="text-xs text-gray-500">Validating...</span>
+          )}
+          {zipcodeError && !isValidating && (
             <span className="text-xs text-red-600">{zipcodeError}</span>
           )}
-          {locationDisplay && !zipcodeError && (
+          {locationDisplay && !zipcodeError && !isValidating && (
             <span className="text-xs text-green-600">✓ {locationDisplay}</span>
           )}
         </label>
