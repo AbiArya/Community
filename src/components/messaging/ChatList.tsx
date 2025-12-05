@@ -62,10 +62,10 @@ function ChatListItem({ chat, currentUserId, isSelected, onSelect }: ChatListIte
   return (
     <button
       onClick={onSelect}
-      className={`w-full flex items-center gap-3 p-4 text-left transition-all ${
+      className={`w-full flex items-center gap-3 p-4 text-left transition-all duration-200 ease-out ${
         isSelected 
           ? "bg-gradient-to-r from-brand-50 to-peach-50 border-l-2 border-brand-500" 
-          : "hover:bg-ink-50 border-l-2 border-transparent"
+          : "hover:bg-ink-50/80 border-l-2 border-transparent active:bg-ink-100"
       }`}
     >
       {/* Avatar */}

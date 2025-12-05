@@ -29,6 +29,7 @@ describe("ProfileView", () => {
     email: "john@example.com",
     bio: "I love hiking and photography",
     location: "San Francisco",
+    zipcode: "94102",
     age: 28,
     age_range_min: 25,
     age_range_max: 35,
@@ -112,7 +113,7 @@ describe("ProfileView", () => {
     expect(screen.getByText("John Doe")).toBeInTheDocument();
     expect(screen.getByText("john@example.com")).toBeInTheDocument();
     expect(screen.getByText("I love hiking and photography")).toBeInTheDocument();
-    expect(screen.getByText("San Francisco")).toBeInTheDocument();
+    expect(screen.getByText("94102")).toBeInTheDocument(); // zipcode instead of location
     expect(screen.getByText("28")).toBeInTheDocument();
     expect(screen.getByText("Hiking")).toBeInTheDocument();
     expect(screen.getByText("Outdoor Activities")).toBeInTheDocument();

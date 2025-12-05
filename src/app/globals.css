@@ -187,12 +187,18 @@ select {
     font-weight: 600;
     color: white;
     box-shadow: 0 25px 60px -25px rgba(124, 58, 237, 0.75);
-    transition: transform 200ms, background-color 200ms;
+    transition: transform 200ms ease-out, background-color 200ms ease-out, box-shadow 200ms ease-out;
   }
 
   .btn-primary:hover:not(:disabled) {
     background-color: var(--color-brand-500);
     transform: translateY(-2px);
+    box-shadow: 0 30px 70px -25px rgba(124, 58, 237, 0.85);
+  }
+
+  .btn-primary:active:not(:disabled) {
+    transform: scale(0.98) translateY(0);
+    box-shadow: 0 20px 50px -25px rgba(124, 58, 237, 0.7);
   }
 
   .btn-primary:focus-visible {
@@ -216,12 +222,18 @@ select {
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--color-ink-700);
-    transition: transform 200ms, color 200ms;
+    transition: transform 200ms ease-out, color 200ms ease-out, border-color 200ms ease-out, background-color 200ms ease-out;
   }
 
   .btn-secondary:hover:not(:disabled) {
     color: var(--color-brand-600);
+    border-color: var(--color-brand-200);
+    background-color: rgba(255, 255, 255, 0.9);
     transform: translateY(-2px);
+  }
+
+  .btn-secondary:active:not(:disabled) {
+    transform: scale(0.98) translateY(0);
   }
 
   .btn-secondary:focus-visible {
@@ -241,6 +253,12 @@ select {
     background: white;
     box-shadow: 0 10px 15px -3px rgba(17, 20, 35, 0.1),
                 0 4px 6px -2px rgba(17, 20, 35, 0.05);
+    transition: box-shadow 300ms ease-out, transform 300ms ease-out;
+  }
+
+  .card-elevated:hover {
+    box-shadow: 0 20px 25px -5px rgba(17, 20, 35, 0.12),
+                0 8px 10px -4px rgba(17, 20, 35, 0.06);
   }
 
   .card-feature {
@@ -248,6 +266,12 @@ select {
     border: 1px solid rgba(255, 255, 255, 0.6);
     background: rgba(255, 247, 235, 0.7);
     box-shadow: 0 30px 70px -55px rgba(17, 20, 35, 0.65);
+    transition: box-shadow 300ms ease-out, transform 300ms ease-out;
+  }
+
+  .card-feature:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 35px 80px -55px rgba(17, 20, 35, 0.7);
   }
 
   .card-stat {
@@ -255,6 +279,12 @@ select {
     border: 1px solid rgba(255, 255, 255, 0.6);
     background: rgba(255, 255, 255, 0.7);
     box-shadow: 0 15px 35px rgba(17, 20, 35, 0.08);
+    transition: box-shadow 200ms ease-out, background-color 200ms ease-out;
+  }
+
+  .card-stat:hover {
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 20px 40px rgba(17, 20, 35, 0.1);
   }
 
   /* Input Styles */
@@ -265,17 +295,22 @@ select {
     border-radius: 0.5rem;
     background-color: white;
     color: var(--color-ink-900);
-    transition: border-color 150ms, box-shadow 150ms;
+    transition: border-color 200ms ease-out, box-shadow 200ms ease-out, background-color 200ms ease-out;
   }
 
   .input-base::placeholder {
     color: var(--color-ink-300);
   }
 
+  .input-base:hover:not(:focus):not(:disabled) {
+    border-color: var(--color-ink-300);
+  }
+
   .input-base:focus {
     outline: none;
     border-color: transparent;
     box-shadow: 0 0 0 2px var(--color-brand-500);
+    background-color: white;
   }
 
   .input-base:disabled {

@@ -28,7 +28,7 @@ export function Navigation() {
 
   function linkClass(href: string) {
     const base =
-      "text-sm font-medium text-ink-500 transition hover:text-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-200 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent";
+      "relative text-sm font-medium text-ink-500 transition-colors duration-200 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-200 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:bg-brand-500 after:transition-transform after:duration-200 hover:after:scale-x-100";
     const isActiveRoute = href === pathname;
     const isActiveHome = href === "/" && pathname === "/" && !hash;
     const isActiveHash = pathname === "/" && href.startsWith("/#") && hash === href.slice(1);
@@ -37,7 +37,7 @@ export function Navigation() {
     const isActiveMatches = href === "/matches" && pathname.startsWith("/matches");
     const isActiveMessages = href === "/messages" && pathname.startsWith("/messages");
     const active = isActiveRoute || isActiveHome || isActiveHash || isActiveProfile || isActiveSettings || isActiveMatches || isActiveMessages;
-    return active ? `${base} text-ink-900` : base;
+    return active ? `${base} text-ink-900 after:scale-x-100` : base;
   }
 
   async function handleLogout() {
@@ -121,7 +121,7 @@ export function Navigation() {
       </Link>
       <button
         onClick={handleLogout}
-        className="text-sm font-medium text-ink-500 transition hover:text-brand-600"
+        className="relative text-sm font-medium text-ink-500 transition-colors duration-200 hover:text-brand-600 after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:bg-brand-500 after:transition-transform after:duration-200 hover:after:scale-x-100"
         aria-label="Log out"
       >
         Logout
@@ -134,7 +134,7 @@ export function Navigation() {
       </Link>
       <Link
         href="/signup"
-        className="inline-flex items-center justify-center rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_25px_45px_-20px_rgba(124,58,237,0.65)] transition hover:-translate-y-0.5 hover:bg-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-200 focus-visible:ring-offset-2"
+        className="inline-flex items-center justify-center rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_25px_45px_-20px_rgba(124,58,237,0.65)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-brand-500 hover:shadow-[0_30px_50px_-20px_rgba(124,58,237,0.75)] active:scale-[0.98] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-200 focus-visible:ring-offset-2"
       >
         Get started
       </Link>

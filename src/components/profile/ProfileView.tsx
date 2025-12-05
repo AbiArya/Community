@@ -5,6 +5,7 @@ import { useProfileData } from "@/hooks/useProfileData";
 import { useState } from "react";
 import { ProfileEdit } from "./ProfileEdit";
 import { ProfilePreview } from "./ProfilePreview";
+import { SkeletonProfile } from "@/components/ui/Skeleton";
 
 export function ProfileView() {
   const { data: profile, isLoading, error, refresh } = useProfileData();
@@ -15,15 +16,7 @@ export function ProfileView() {
   const profileKey = profile?.updated_at || 'no-profile';
 
   if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="animate-pulse">
-          <div className="mb-4 h-8 w-1/3 rounded bg-ink-200"></div>
-          <div className="mb-2 h-4 w-1/2 rounded bg-ink-200"></div>
-          <div className="h-4 w-2/3 rounded bg-ink-200"></div>
-        </div>
-      </div>
-    );
+    return <SkeletonProfile />;
   }
 
   if (error) {
