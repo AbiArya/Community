@@ -21,7 +21,7 @@ export function Footer() {
           </Link>
           <Link
             href="/signup"
-            className="inline-flex items-center justify-center rounded-full border border-brand-200 bg-brand-50/70 px-4 py-2 text-sm font-semibold text-brand-700 shadow-[0_10px_30px_rgba(124,58,237,0.15)] transition hover:-translate-y-0.5 hover:bg-brand-100"
+            className="inline-flex items-center justify-center rounded-full border border-brand-200 bg-brand-50/70 px-4 py-2 text-sm font-semibold text-brand-700 shadow-[0_10px_30px_rgba(212,85,0,0.10)] transition hover:-translate-y-0.5 hover:bg-brand-100"
           >
             Get started
           </Link>

@@ -48,3 +48,4 @@ COMMENT ON INDEX public.idx_user_hobbies_user_rank IS
 COMMENT ON INDEX public.idx_user_photos_user_order IS 
   'Optimizes photo fetches ordered by display order';
 
+

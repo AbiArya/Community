@@ -82,3 +82,4 @@ $$;
 COMMENT ON FUNCTION public.get_user_matches_enriched IS 
   'Returns all matches for a user with full profile data, photos, and hobbies in a single query. Replaces 4 sequential queries.';
 
+

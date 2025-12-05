@@ -203,7 +203,7 @@ export function MatchCard({ match }: MatchCardProps) {
           <button
             onClick={() => user?.id && router.push(`/messages?user_id=${user.id}`)}
             disabled={!user?.id}
-            className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_30px_-10px_rgba(124,58,237,0.5)] transition-all duration-200 ease-out hover:from-brand-600 hover:to-brand-700 hover:-translate-y-0.5 hover:shadow-[0_15px_35px_-10px_rgba(124,58,237,0.6)] active:scale-[0.98] active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_30px_-10px_rgba(212,85,0,0.40)] transition-all duration-200 ease-out hover:from-brand-600 hover:to-brand-700 hover:-translate-y-0.5 hover:shadow-[0_15px_35px_-10px_rgba(255,122,0,0.50)] active:scale-[0.98] active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />

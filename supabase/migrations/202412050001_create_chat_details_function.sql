@@ -164,3 +164,4 @@ COMMENT ON FUNCTION public.get_user_chats_with_details IS
 COMMENT ON FUNCTION public.get_chat_details IS 
   'Returns a single chat with full details for a user. Used when chat is not in cache.';
 
+

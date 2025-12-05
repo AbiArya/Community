@@ -134,7 +134,7 @@ export function Navigation() {
       </Link>
       <Link
         href="/signup"
-        className="inline-flex items-center justify-center rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_25px_45px_-20px_rgba(124,58,237,0.65)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-brand-500 hover:shadow-[0_30px_50px_-20px_rgba(124,58,237,0.75)] active:scale-[0.98] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-200 focus-visible:ring-offset-2"
+        className="inline-flex items-center justify-center rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_25px_45px_-20px_rgba(212,85,0,0.50)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-brand-500 hover:shadow-[0_30px_50px_-20px_rgba(255,122,0,0.60)] active:scale-[0.98] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-200 focus-visible:ring-offset-2"
       >
         Get started
       </Link>
@@ -257,7 +257,7 @@ export function Navigation() {
                   </Link>
                   <Link
                     href="/signup"
-                    className="inline-flex items-center justify-center rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_25px_45px_-20px_rgba(124,58,237,0.65)] transition hover:-translate-y-0.5 hover:bg-brand-500"
+                    className="inline-flex items-center justify-center rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_25px_45px_-20px_rgba(212,85,0,0.50)] transition hover:-translate-y-0.5 hover:bg-brand-500"
                     onClick={() => setMenuOpen(false)}
                   >
                     Get started

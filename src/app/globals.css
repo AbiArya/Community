@@ -2,52 +2,79 @@
 
 :root {
   color-scheme: light;
-  --background: #fdf7f0;
-  --foreground: #070b1a;
+  --background: #fef9f3;
+  --foreground: #2d2418;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* Brand Colors (Primary - Purple) */
-  --color-brand-50: #f3e6ff;
-  --color-brand-100: #e5cbff;
-  --color-brand-200: #d1a2ff;
-  --color-brand-300: #bd7bff;
-  --color-brand-400: #a24dff;
-  --color-brand-500: #8b30ff;
-  --color-brand-600: #7a21ef;
-  --color-brand-700: #6418c6;
-  --color-brand-800: #4f1199;
-  --color-brand-900: #360c66;
+  /* Brand Colors (Primary - Vibrant Coral) */
+  /* Bright, energetic, and inviting */
+  --color-brand-50: #fff5f2;
+  --color-brand-100: #ffe4dd;
+  --color-brand-200: #ffc9bb;
+  --color-brand-300: #ffa08a;
+  --color-brand-400: #ff6f4a;
+  --color-brand-500: #ff5232;
+  --color-brand-600: #ed3415;
+  --color-brand-700: #c7280e;
+  --color-brand-800: #a42512;
+  --color-brand-900: #882416;
 
-  /* Peach Colors (Secondary - Warm) */
-  --color-peach-50: #fff0e6;
-  --color-peach-100: #ffd7bf;
-  --color-peach-200: #ffb38a;
-  --color-peach-300: #ff8f55;
-  --color-peach-400: #ff712b;
-  --color-peach-500: #f85a0a;
+  /* Peach Colors (Secondary - Warm Sunset) */
+  /* Bright peachy orange for warmth */
+  --color-peach-50: #fff7ed;
+  --color-peach-100: #ffead5;
+  --color-peach-200: #ffd1aa;
+  --color-peach-300: #ffb274;
+  --color-peach-400: #ff8b3c;
+  --color-peach-500: #ff6f16;
+  --color-peach-600: #f0540c;
+
+  /* Teal Colors (Accent - Cool Pop) */
+  /* Strategic contrast that makes warm colors sing */
+  --color-teal-50: #effefb;
+  --color-teal-100: #c8fff6;
+  --color-teal-200: #91ffee;
+  --color-teal-300: #52f5e2;
+  --color-teal-400: #1edecb;
+  --color-teal-500: #06c4b2;
+  --color-teal-600: #029d91;
+  --color-teal-700: #077d75;
+  --color-teal-800: #0b635e;
+  --color-teal-900: #0e524e;
+
+  /* Honey Colors (Accent - Bright Gold) */
+  /* Sunshine energy, happiness */
+  --color-honey-50: #fffbeb;
+  --color-honey-100: #fff3c4;
+  --color-honey-200: #ffe066;
+  --color-honey-300: #ffd02b;
+  --color-honey-400: #ffc107;
+  --color-honey-500: #e9a500;
+  --color-honey-600: #cc7f00;
 
   /* Sand Colors (Neutral Warm) */
-  --color-sand-50: #fff7eb;
-  --color-sand-100: #fde8cf;
-  --color-sand-200: #f4d2aa;
-  --color-sand-300: #dcb37f;
-  --color-sand-400: #b88a57;
+  --color-sand-50: #fefaf5;
+  --color-sand-100: #fdf2e6;
+  --color-sand-200: #f5e1ca;
+  --color-sand-300: #e8cba6;
+  --color-sand-400: #d4ac7a;
 
-  /* Ink Colors (Neutral Cool - Text & UI) */
-  --color-ink-50: #f6f7fb;
-  --color-ink-100: #e6e8f2;
-  --color-ink-200: #ccd0e2;
-  --color-ink-300: #a3a8c0;
-  --color-ink-400: #7c829e;
-  --color-ink-500: #616684;
-  --color-ink-600: #4a4f6a;
-  --color-ink-700: #2f3246;
-  --color-ink-800: #1f2232;
-  --color-ink-900: #111423;
+  /* Ink Colors (Neutral Warm - Text & UI) */
+  /* Warm charcoals instead of cool blue-grays */
+  --color-ink-50: #faf8f6;
+  --color-ink-100: #f0ebe5;
+  --color-ink-200: #e0d7cd;
+  --color-ink-300: #c4b5a5;
+  --color-ink-400: #a08d7a;
+  --color-ink-500: #867460;
+  --color-ink-600: #6d5c4a;
+  --color-ink-700: #4a3d30;
+  --color-ink-800: #352b21;
+  --color-ink-900: #2d2418;
 
   /* Semantic Colors - Success */
   --color-success-50: #f0fdf4;
@@ -102,8 +129,9 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 20% -10%, rgba(122, 33, 239, 0.32), transparent 55%),
-    radial-gradient(circle at 80% 0%, rgba(255, 140, 43, 0.28), transparent 45%),
+    radial-gradient(circle at 10% -5%, rgba(255, 82, 50, 0.16), transparent 45%),
+    radial-gradient(circle at 90% 10%, rgba(6, 196, 178, 0.14), transparent 40%),
+    radial-gradient(circle at 50% 100%, rgba(255, 111, 22, 0.12), transparent 50%),
     var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
@@ -130,12 +158,12 @@ select {
 }
 
 ::selection {
-  background: rgba(140, 92, 246, 0.2);
+  background: rgba(255, 82, 50, 0.20);
   color: var(--color-ink-900);
 }
 
 :focus-visible {
-  outline: 2px solid rgba(124, 58, 237, 0.7);
+  outline: 2px solid rgba(6, 196, 178, 0.70);
   outline-offset: 3px;
   border-radius: 0.25rem;
 }
@@ -181,24 +209,24 @@ select {
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-pill);
-    background-color: var(--color-brand-600);
+    background-color: var(--color-brand-500);
     padding: 0.75rem 1.5rem;
     font-size: 0.875rem;
     font-weight: 600;
     color: white;
-    box-shadow: 0 25px 60px -25px rgba(124, 58, 237, 0.75);
+    box-shadow: 0 25px 60px -25px rgba(255, 82, 50, 0.50);
     transition: transform 200ms ease-out, background-color 200ms ease-out, box-shadow 200ms ease-out;
   }
 
   .btn-primary:hover:not(:disabled) {
-    background-color: var(--color-brand-500);
+    background-color: var(--color-brand-600);
     transform: translateY(-2px);
-    box-shadow: 0 30px 70px -25px rgba(124, 58, 237, 0.85);
+    box-shadow: 0 30px 70px -25px rgba(255, 82, 50, 0.60);
   }
 
   .btn-primary:active:not(:disabled) {
     transform: scale(0.98) translateY(0);
-    box-shadow: 0 20px 50px -25px rgba(124, 58, 237, 0.7);
+    box-shadow: 0 20px 50px -25px rgba(255, 82, 50, 0.45);
   }
 
   .btn-primary:focus-visible {
